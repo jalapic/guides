@@ -1,2 +1,516 @@
-# The pool of tears
+# Analyzing Social Hierarchy Data
 
+
+<br>
+
+## Overview
+
+This is a brief introduction into how my lab analyzes social hierarchy data. It is primarily for my students to use as a guide, but much of it is probably useful for anybody that has any type of win-loss data.
+
+We will use an example raw data file from our lab and various R packages to analyze the data. We will heavily use my [compete R package](https://github.com/jalapic/compete) for analyzing competitive social interactions. The package contains some functions for transitioning data from edgelists of winner-losers to raw frequency win-lose sociomatrices to binary sociomatrices. The package also contains several functions for calculating particular hierarchy metrics. Additional R packages for calculating other metrics that we will use are detailed below. We will also source some code I’ve stored on GitHub ([compete_extra.R](https://gist.githubusercontent.com/jalapic/6ca3ece44bdcdc522bb735f183aa0ca0/raw/1a07f469eff08117121b6cbebcd22fb7569e3ee8/compete_extra.R)) that contains several functions used here.
+
+<br>
+
+## Raw Data
+
+We collect data on which animals win and lose during dyadic agonistic interactions that occur continuously within a social group. Typically we study groups of 12 individuals - each individual being randomly assigned the numbers 1-12 to identify them. Wins and losses (and ties) are collected in real time by observers who upload to a Google Survey data sheet. One option for retrieving the raw data would be to automatically download the data from Google Survey itself using an R package like [googlesheets4](https://googlesheets4.tidyverse.org/). However, for now the simplest method is to download the raw data file from Google and store it somewhere. I have done this for an example file and stored it on GitHub.
+
+Note to students: make sure you download the file as a csv file not an xls file. The timestamp column should have seconds in it - if you save as an xls file it may get rid of the seconds and they will all appear as 00.
+
+For this introduction, we will use the [data stored here](https://gist.github.com/jalapic/97d05d598e9d4d96be5686e87b5bd452):
+
+
+```{r, message=FALSE, warning=FALSE}
+df <- read.csv("https://gist.githubusercontent.com/jalapic/97d05d598e9d4d96be5686e87b5bd452/raw/fe60da1542527d159e105c5560f250886f54a2dc/mousedata.csv", stringsAsFactors = F)
+head(df)
+```
+
+<br>
+
+## Data Cleanup
+
+The first thing to do with the raw data is to clean up mistakes made by observers and to check for other mistakes. These will generally be put in the notes column, but there are others to check for. The main issues are to do with animals being misidentified or observers forgetting to enter a start/end time or adding multiple start/end times.
+
+Most notes in this example dataset are blank - but you can see those that are there by doing the following to remove `NA`:
+
+```{r, message=FALSE, warning=FALSE}
+df$Notes[!is.na(df$Notes)]
+```
+The only comment here that needs double checking is the one where the observer couldn’t determine who won. That contest should be scored as a tie. We can check by finding the row number and searching for it.
+
+```{r, message=FALSE, warning=FALSE}
+which(df$Notes=="couldn't tell who won")
+```
+
+```{r}
+df[951,]
+```
+
+As can be seen, it’s a tie between 2 & 9.
+
+
+<br>
+
+### Time Formats
+
+Next, it’s useful to add a day column and a time column. The following assumes:
+
+- that the first day of observations was the first day of housing (it almost always is).
+- that there were no changes in daylight savings or light cycle
+- that the google survey was set up in EST.
+- that the observations all took place within the same calendar year.
+
+If any of the above are not true, the following code needs to be adjusted. If they are all true we’ll first convert the Google Survey timestamp to R’s Date-Time format and extract the day and time.
+
+We use the `lubridate` package to extract hours and days. We also make sure the Date-Time format we use is `POSIXct` as `POSIXlt` uses too much memory. The first day of observations is day 1. The first hour of observation each day is at 12pm when the lights change from white to red (the animals become more active in red light/dark phase).
+
+```{r, message=FALSE, warning=FALSE}
+df$Timestamp <- as.POSIXct(strptime(df$Timestamp,'%m/%d/%Y %H:%M:%S'))
+
+df$day <- lubridate::yday(df$Timestamp) - min(lubridate::yday(df$Timestamp)) + 1
+df$zhour <- lubridate::hour(df$Timestamp)-11
+
+
+head(df)
+```
+
+
+```{r}
+tail(df)
+```
+
+```{r}
+unique(df$day)
+```
+
+Notice that there are no observations for day=20 - this will be relevant later on when we plot data by day.
+
+<br>
+
+### Actor/Recipients
+
+Next we will look at the Actor and Recipient variables.
+
+```{r, message=FALSE, warning=FALSE}
+unique(df$Actor)
+```
+
+```{r, message=FALSE, warning=FALSE}
+unique(df$Recipient)
+```
+
+First of all, we can remove the ‘Start’ and ‘End’ rows. These indicate when an observer starts and finishes their set observation. We need these when counting rates of behavior per hour, but we won’t do that in this example.
+
+```{r}
+df <- df[df$Actor!="Start",]
+df <- df[df$Actor!="End",]
+```
+
+The next thing to deal with is that some rows have multiple values in the ‘Actor’ or ‘Recipient’ columns. This can be either:
+
+two individuals tie during a contest (then both Actor and Recipient will have same two animals in the entry) one Actor beats more than one Recipient simultaneously one Recipient is beaten by more than one Actor simultaneously (much less common)
+To simplify this process, I have stored a function - `expandrows` on GitHub that we can source. With time, I’ll add this function to my CurleyLab R package to make it easily available. To use it, you must have `splitstackshape` and `data.table` installed. The former is a great package for easy management of google survey type data. This function also adds a column ‘score’ with a 1 indicating a clear win for the Actor vs the Recipient, and a 0.5 indicating a tie.
+
+
+```{r, message=FALSE, warning=FALSE}
+source("https://gist.githubusercontent.com/jalapic/6ca3ece44bdcdc522bb735f183aa0ca0/raw/1a07f469eff08117121b6cbebcd22fb7569e3ee8/compete_extra.R")
+
+df1<-expandrows(df)
+
+head(df1)
+```
+
+```{r, message=FALSE, warning=FALSE}
+nrow(df1)
+table(df1$Actor)
+table(df1$Recipient)
+table(df1$score)
+
+```
+
+In total we have 1031 agonistic interactions of which only 6 are ties.
+
+Having got our data cleaned up, we can quickly look at a preliminary raw sociomatrix:
+
+```{r, message=FALSE, warning=FALSE}
+xtabs(~ Actor + Recipient, df1)
+```
+
+
+
+<br>
+
+## Data Analysis
+
+Once our data is in this clean format we can proceed with the basic data analysis. First of all we will consider all behaviors together - i.e. we won’t subset or weight by fighting, chasing, mounting or subordinate behaviors. We may want to do this for more fine-grained analysis, but not for this example. Also, we will consider all data collected over all days together to start with.
+
+We will use the `compete` package to create sociomatrices and calculate several metrics.
+
+```{r, message=FALSE, warning=FALSE}
+# devtools::install_github('jalapic/compete')
+library(compete)
+```
+
+<br>
+
+### Create Sociomatrices
+
+First we only need the winner and loser variables. Also, in this basic analysis, we will exclude ties. We could consider ties to be a 0.5 win, but given their low prevalence, it does not affect our results to exclude here. (Note the `get_wl_matrix` and `get_di_matrix` functions in compete can also automatically remove ties).
+
+Also, because df1 is actually a `data.table` (produced by the `expandrows` function), we need to use data.table style indexing.
+
+```{r, message=FALSE, warning=FALSE}
+wldf <- df1[score==1][, c(2,4), with = FALSE] 
+#data.table indexing
+
+head(wldf)
+```
+
+The `get_wl_matrix` creates a raw frequency sociomatrix of wins and losses. This is similar to the table above. Here, e.g. animal 6 ‘won’ 13 times against animal 2, and animal 7 had 17 wins against animal 8.
+
+```{r, message=FALSE, warning=FALSE}
+wlmat <- get_wl_matrix(wldf)
+
+wlmat
+```
+
+
+For quick visualization purposes, we can use the `org_matrix` function. There are three methods of displaying the table - by alphanumeric name (`alpha`), by total wins (`wins`) or by David’s Scores (a measure of relative dominance).
+
+Using the David’s Scores Methods, it looks a lot clearer that this social group has a hierarchical structure.
+
+```{r, message=FALSE, warning=FALSE}
+org_matrix(wlmat, method="ds")
+```
+Another useful matrix to keep is the binarized win-loss matrix. This can be done using the `get_di_matrix` function. There are many ways in which a raw frequency sociomatrix could be converted to a binary matrix involving how to deal with ties, how to deal with structural zeros (unknown relationships where no observations were made between two individuals), and what criteria to use to choose a ‘clear’ winner. Here, we will use the simplest measure of assigning a 1 to individuals who win more frequently than the opposing individual and a 0 to losers or if there are ties (e.g. if both animals had 1 win against each other).
+
+```{r, message=FALSE, warning=FALSE}
+bimat <- get_di_matrix(wlmat)
+org_matrix(bimat, method="ds")
+```
+<br>
+
+## Basic hierarchy Measures
+
+### Descriptives
+
+From the above matrices we can calculate a number of descriptive statistics.
+
+The `rshps` function gives us the total relationships in the group, the total number of unknown relationships (i.e. each animal recorded 0 wins against each other), the number of relationships that are tied (i.e. no clear winner), the number of twoways relationships (where both animals recorded at least one win) and the number of oneways relationships (where only one animal recorded a win).
+
+```{r, message=FALSE, warning=FALSE}
+rshps(wlmat)
+```
+
+
+<br>
+
+### Directional Consistency
+
+The Directional Consistency of the sociomatrix - 0 meaning no directional consistency and 1 indicating that all contests are won by more dominant individuals over more subordinate individuals. The skew-symmetry index determines if there is asymmetry in interactions in a sociomatrix. 0 indicates complete reciprocity whereas 0.5 indicates complete unidirectionality.
+
+The `dc_test` function will run the statistical tests suggested by [Leiva et al. 2009](https://reunido.uniovi.es/index.php/Rema/article/view/9788) to ascertain if the directional consistency and phi values are significant or not.
+
+```{r, message=FALSE, warning=FALSE}
+dc_test(wlmat)
+```
+
+For quick access to the DC and phi values, the following functions can be run:
+
+```{r, message=FALSE, warning=FALSE}
+dci(wlmat)
+phi(wlmat)
+```
+
+<br>
+
+### De Vries’ Modified h’ value
+
+The most common measure of social hierarchy linearity is the modified h’ value by [De Vries 1995](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.507.3738&rep=rep1&type=pdf). The `devries` function will provide the h’ value of a sociomatrix and associated p-value from a randomization test.
+
+```{r, message=FALSE, warning=FALSE}
+devries(wlmat)
+```
+
+It’s also possible to plot the results of the randomization test:
+
+```{r, message=FALSE, warning=FALSE}
+devries(wlmat, plot=T)
+```
+
+<br>
+
+### Triangle Transitivity
+
+The third measure of hierarchical organization is the triangle transitivity suggested by [Shizuka & McDonald 2012](doi:10.1016/j.anbehav.2012.01.011). This measure calculate the proportion of transitive versus intransitive triads within the directed network. The index ranges between 0 and 1, with 1 indicating that all triads are transitive (i.e. there are no cycles). This function also provides output from a randomization test to assess if the proportion of transitive triads is higher than expected (i.e. there is hierarchical organization).
+
+```{r, message=FALSE, warning=FALSE}
+ttri_test(wlmat)
+```
+
+This value can be ascertained quickly using `ttri`:
+
+```{r, message=FALSE, warning=FALSE}
+ttri(wlmat)
+```
+
+There are of course several other network measures that could be used to describe the hierarchical organiation of a social hierarchy, but I won’t cover those here.
+
+<br>
+
+### Steepness
+
+Another measure of hierarchies are how steep the individual differences in David’s Scores are - prosposed by [De Vries et al 2006](http://www.sciencedirect.com/science/article/pii/S0003347206000066). The higher the steepness, the greater the differences between individual ranks in their ratings. The scores range between 0 and 1, with 1 having the greatest differences between ranks in scores. We can test this using the `steepness` package.
+
+
+```{r, message=FALSE, warning=FALSE}
+library(steepness)
+steep <- steepness::steeptest(wlmat, rep=10000)
+steep$Stp #Steepness
+```
+
+```{r, message=FALSE, warning=FALSE}
+sum( (steep$Stpsim > steep$Stp) / 10000 )  #pvalue
+```
+
+
+<br>
+
+## Individual Ranking Measures
+
+A proliferation of ranking methods exist to try and determine which individual is more ‘dominant’, ‘powerful’ or ‘influential’ in a group. Many of the more recent methods are network based (I will cover these in a future tutorial/primer), others come from the sports data literature. Here I will describe some standard methods used in animal behavior.
+
+<br>
+
+### David’s Scores
+
+A simple measure is the David’s Scores of each individual. This can be considered to be the opponent-adjusted win proportion of each individual. Individuals with positive David’s Scores are more dominant. Individuals with negative David’s Scores are losing more fights.
+
+
+```{r}
+ds(wlmat)
+```
+
+Viewing this as a simple plot shows the steepness of David’s Scores:
+
+
+```{r, message=FALSE, warning=FALSE}
+plot(1:12, rev(sort(ds(wlmat))), "l",
+     xlab = "Rank",
+     ylab = "David's Score",
+     main = "David's Scores by Rank")
+abline(h = 0, col = "red", lty = 3)
+```
+
+
+<br>
+
+### I&SI Method
+
+A commonly used method is the linear ordering algorithm - the I&SI ranking method. This attempts to shuffle the binary sociomatix such that 1s are all above the diagonal and 0s are all below the diagonal. Further, it tries to get 1s under the diagonal as close to it as possible. This is computationally expensive - and I need to implement this in C++ in the next version of the `compete` package. There are two versions of this algorithm - `isi98` is the original method [proposed here](https://www.ncbi.nlm.nih.gov/pubmed/9632471) and `isi13` is the updated method [proposed here](http://www.sciencedirect.com/science/article/pii/S0003347213004132). I recommend using the former as the updated version is too slow for most matrices - and the additional benefit in improved linear ordering isn’t huge. Also, it is worth running this procedure a few times to find the optimal ranking as it uses randomization to try and find the best matrix.
+
+The output gives the initial matrix order, the proposed ‘best matrix’, the I (number of inconsistencies), the SI (the strength of inconsistencies), and the ‘best order’ of ranks. It also gives ‘rs’ the correlation between the ranks proposed by the I&SI method and the David’s Scores. Running this example several times, it appears as if the best solution is I=3, SI=10 and rs=0.88.
+
+
+```{r, message=FALSE, warning=FALSE}
+isi.out <-  isi98(wlmat)
+```
+
+```{r}
+isi.out
+```
+
+<br>
+
+### Despotism
+
+Another metric we can calculate is the proportion of wins made by each animal. The proportion of wins made by the alpha male is that individual’s ‘despotism’. I’ll implement this as a function in the `compete` package in the future - at present, it can be found in the sourced code from GitHub above.
+
+
+```{r}
+despotism(wlmat)
+```
+
+
+<br>
+
+
+## Plotting Sociomatrices
+
+We can also use the observed best ranking order of our choice to make a customized raw sociomatrix that we could use in a publication. This is using a `ggplot2` based function I wrote called matrixplot. If you lookup the function, you can change the color scheme if you wish.
+
+```{r, message=FALSE, warning=FALSE, fig.width=6, fig.height=6}
+matrixplot(wlmat, mylevs=isi.out$best_order)
+```
+
+
+There is also a plot to color the binarized matrix based on the directional consistency of each relationship. The redder a cell, the higher the proportion of wins by that individual. This method is useful for quickly visualizing the inconsistencies in the hierarchy.
+
+```{r, message=FALSE, warning=FALSE, fig.width=6, fig.height=6}
+matrixplot0(wlmat, mylevs=isi.out$best_order)
+```
+
+
+Interestingly the relationship that has the most noticable inconsistency is id-11 vs id-3, where 11 beat 3 eight times but 3 never beat 11. This is despite 3 being higher ranked than 11. Often when examining all data over all days such inconsistencies may be the result of initial day 1 or day 2 interactions. This can be checked using the function `contests`.
+
+```{r, message=FALSE, warning=FALSE}
+contests(df1,11,3)
+```
+
+Here there are three early interactions on day 3, but 11 continues to beat 3 on the last two days of observation. This was by three separate observers suggesting that it is reliable. Most interestingly though, none of the agonistic interactions were fights - all were chases or induced subordinate behaviors (in our ethogram ‘induced-flee’ means here that animal 11 caused 3 to flee and on row 1 that animal 11 caused animal 3 to show a subordinate posture.
+
+Clearly, there are many other methods for assessing the individual rankings/ratings of a social group. There are several network based metrics, matrix based measures, preferred comparison methods etc. I may cover these in a future primer.
+
+
+## Network Certainty
+
+Another valuable approach is to measure the certainty we have of each individual’s ranking using [network certainty](https://peerj.com/articles/2394.pdf). With this method, we can get the ranking of each individual according to their network position (akin to how much power or influence over others an individual has) and determine how certain we are of that ranking by examining the consistency of indirect relationships. We can use the `Perc` R package to do this.
+
+```{r, message=FALSE, warning=FALSE}
+library(Perc)
+obsmat <- as.conflictmat(wldf)
+DominanceProbability.obs <- conductance(obsmat, maxLength = 2)
+s.rank.obs <- simRankOrder(DominanceProbability.obs$p.hat, num = 10, kmax = 10)
+dfobs <- merge(individualDomProb(DominanceProbability.obs$p.hat), s.rank.obs$BestSimulatedRankOrder)
+plot(dfobs$ranking, dfobs$Mean,
+     xlab="Rank", ylab="Dominance Certainty")
+```
+
+
+<br>
+
+
+## Temporal Based Methods
+
+
+### Glicko Ratings
+
+There are a number of temporally based ratings methods that calculate dynamic changes in ratings over time. Two of these methods - [ELO & Glicko](http://glicko.net/glicko.html) - are pairwise-contest models where all individuals start with an initial rating. Without any other knowledge about the individuals we assume they all have the same initial ratings. Individuals gain points for each win and lose points for each loss. The magnitude of the gain/loss in points is based on the ratings difference between contestants at a particular time. Each method has a constant value that adjusts this calculation. I prefer the Glicko method because it additionally has a standard deviation of ratings giving us a measure of how certain we are that individuals differ. The Glicko also has a decay function meaning that the rating uncertainty increases if individuals haven’t competed in a while.
+
+We could calculate ratings at the end of each day. Most primate studies use this approach. However, as we observe all animals all of the time, I prefer to recalculate ratings after every observation and use a smaller constant value (a higher constant value makes the ratins more volatile - they respond to changes more rapidly).
+
+We can use the `PlayerRatings` package to calculate the Glicko ratings like this:
+
+```{r, message=FALSE, warning=FALSE}
+library(PlayerRatings)
+df1 <- df1[order(df1$Timestamp),] #ensure in date order
+df1$event <- 1:nrow(df1)
+glick.df <- df1[, c(11,2,4,10), with = FALSE] #need event, actor, recipient, score
+gl <- glicko(glick.df, history=T, cval=2)
+gl
+```
+
+<br>
+
+Of course, the choice of `cval` affects how volatile individual ratings are. When recalculating ratings after every behavioral interaction, we have found that a lower value of `cval` provides stable rankings that most strongly reflect the rankings of animals as determined by other methods.
+
+How Glicko ratings change over time can be calculated using the basic plot function:
+
+```{r, message=FALSE, warning=FALSE}
+plot(gl,npl=12)
+```
+
+<br>
+The above base r plot is not aesthetically pleasing. I have created a default function that allows us to take a glicko object and convert this to a more attractive plot.
+
+```{r, message=FALSE, warning=FALSE}
+plotglicko(glick.df, cval=2, ylim1=1500, ylim2=3000, thetitle="Glicko Ratings over Time",linewd=.5)
+```
+
+<br>
+
+We can also plot the final glicko ratings by rank and show the deviations in ratings scores.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(gl$ratings, aes(x=1:12, y=Rating)) + 
+  geom_point(size=2) + 
+  scale_x_continuous(breaks=1:12, labels=gl$ratings$Player)+
+  geom_errorbar(aes(ymin=Rating-Deviation, ymax=Rating+Deviation),
+                width=.2,                    
+                position=position_dodge(.9),
+                size=.5) +
+  geom_hline(yintercept=2200, color='red', linetype='dotted')+
+  ylab("Glicko Rating (Mean ± SD)") +
+  xlab("Animal ID") +
+  theme_classic() +
+  ggtitle("Final Glicko Ratings")
+```
+
+<br>
+
+
+### Stability Indices
+
+To examine how ‘stable’ rankings are across time, one could use the stability index suggested by [Neumann et al 2011](http://www.eva.mpg.de/pks/staff/widdig/pdf/Neumann_et_al-2011_Assessing_dominance_hierarchie.pdf) and improved upon by [Mcdonald & Shizuka 2013](https://academic.oup.com/beheco/article/24/2/511/250731/Comparative-transitive-and-temporal-orderliness-in). This essentially assesses how many ranking changes there have been across days between two time-points. It ranges between 0 and 1 with 1 indicating complete stability and 0 indicating complete instability in ranking. Here, I will evaluate stability across the whole period using the ELO method as the baseline for assessing ranks. There could be many modifications to this - we could use a different method for determining ratings on each day, we could use a different time-point for comparison (e.g. per hour), we could also change the constant in the ELO formula. There is also a ‘weighting’ factor in this algorithm that accounts for whether to penalize rank changes among higher ranked animals as more impactful on ‘stability’. In the example below, I’ve used the default weighting factor, though the function of this weighting could be adjusted. I may write more about this in the future. We will use the EloRating package to calculate this.
+
+```{r, message=FALSE, warning=FALSE}
+df1.st <- df1[score==1] # we only consider wins at the moment
+df1.st$Date <- as.character(as.Date(df1.st$Timestamp)) #ELO stability function requires a character vector of form "YYYY-MM-DD"
+
+SEQ <- EloRating::elo.seq(winner=df1.st$Actor, loser=df1.st$Recipient, Date=df1.st$Date, k=100, progressbar=FALSE) #note that could change k-factor here;  k=100 default
+SI <- EloRating::stab_elo(SEQ, from=min(SEQ$stability$date),to=max(SEQ$stability$date), weight=T)
+
+SI
+```
+
+Again, there are many other dynamic network based measures of individual ratings that we could use instead. Depending on the data collected and the question of interest, there may be benefits to choosing these methods. I may write a primer on these also in the future.
+
+
+<br>
+
+### Temporal Social Dynamics
+
+Calculating indices of hierarchical organization using all data at once may not be suitable. We may, for instance, wish to see how one metric changes over time. Here, we will look at how triangle transitivity changes over time.
+
+Below, we split the raw data into a new dataframe for everyday containing data from day 1 up to that day. Therefore there are 21 dataframes in total (as there are 21 days’ worth of data - although the last day of observations was 22, we did not have any observations for day 20).
+
+```{r, message=FALSE, warning=FALSE}
+wlmat.days <- lapply(
+  Reduce(rbind, split(df1, df1$day), accumulate=TRUE),
+  function(x) get_wl_matrix(x[score==1][, c(2,4), with = FALSE])
+   )
+
+wlmat.days[[1]]
+```
+
+
+The above matrix is the winner-loser sociomatrix based on only day 1 data.
+
+We can then plot how triangle transitivity changes across days:
+
+
+```{r, message=FALSE, warning=FALSE}
+plot(c(1:19,21:22), unlist(lapply(wlmat.days, function(x) ttri(x)$ttri)), "l", 
+     xlab = "Day",
+     ylab = "Triangle Transitivity",
+     main = "Change in Triangle Transitivity over Days")
+```
+
+<br>
+Of course, we could prefer to use a different temporal strategy. For instance, we could use a sliding window approach looking at how triangle transitivity changes for e.g. 3 days at a time. So we would plot ttri for days 1-3, then days 2-4, 3-5 etc.
+
+Another extension of this approach is something we discussed in our [Animal Behaviour](http://curleylab.psych.columbia.edu/pdfs/Williamson_et_al_2016_AB.pdf) paper. At the end of each day, we could only keep the last ‘n’ interactions between any pair of individuals. This has the advantage of not including behavioral events that occurred long before the day of interest. For example, if animal A had accrued 100 wins against B and B had never beaten A, then if that relationships changed on e.g. day 10 it could take several days to register in the ttri - because it could take a long time for B to get more than 100 wins against A to ‘flip’ that relationship. Only considering e.g. the last 3 interactions overcomes this issue.
+
+To do these calculations we can use a function I wrote that we have already sourced from GitHub above.
+
+```{r, message=FALSE, warning=FALSE}
+ttri_N <- lapply(
+  Reduce(rbind, split(df1, df1$day), accumulate=TRUE),
+  function(x) ttri_lastN(x, N=3)
+   )
+
+plot(c(1:19,21:22), unlist(ttri_N), "l", 
+     xlab = "Day",
+     ylab = "Triangle Transitivity",
+     main = "Change in Triangle Transitivity \n using 3 most recent interactions")
+```
+
+<br>
+
+
+## Summary
+
+In this brief primer, I have shown you how to import the raw data, clean the data up for analysis, calculate measures of overall hierarchical nature of the group and calculate individual metrics of dominance. I’ve also shown how to look at some temporal dynamics.
+
+
+<br>
