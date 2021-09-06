@@ -1,0 +1,940 @@
+# Plotting Sociomatrices
+
+This chapter describes in detail how we make our sociomatrices using the `ggplot2` package.
+
+We assume that you already have data in a sociomatrix.  We will start with one such matrix - the `mouse` matrix that is available in the [`compete`](https://github.com/jalapic/compete) package.
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+# devtools::install_github('jalapic/compete')
+library(compete)
+mouse
+```
+
+These data are actually stored in a data.frame of 12 rows and 12 columns:
+
+```{r}
+str(mouse)
+```
+
+<br>
+
+
+## Raw Sociomatrices
+
+The first step we need to do is to convert the sociomatrix dataframe into long format data so we can give `x` and `y` coordinates. We can do this using the `melt` function from the `reshape2` package. We ensure that this output is a data.frame using `data.frame()`.
+
+In case our diagonal had `NA` entries, we also only keep complete cases.
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+#make the df we will use for plotting
+m.dat <- reshape2::melt(mouse)
+m.dat <- data.frame(m.dat)
+m.dat <- m.dat[complete.cases(m.dat),] #removing NAs
+head(m.dat)
+tail(m.dat)
+```
+
+<br>
+
+This just gives 2 columns of output.  A `variable` column which refers to the original column that the `value` entry came from. We need to add a new column that gives the row location. These are in the order A->L.
+
+We could just add that column like this:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+m.dat$row.id <- LETTERS[1:12]
+head(m.dat)
+tail(m.dat)
+```
+
+<br>
+
+At this point, there are two main things that we should do before plotting.  i) Decide whether to remove zeros - as sociomatrices generally look better without them in.  ii) Reorder the ids by their dominance. 
+
+Let's first make a very basic plot without doing either of these things.
+
+
+We use `geom_tile()` from `ggplot2` to make our plot, and use `geom_text()` to add in the value. The `x` axis should be the loser (column from original sociomatrix) and the `y` axis should be the winner (row from the original sociomatrix).
+
+The parameters inside `geom_tile()` define the color, fill and size of each tile.
+
+The parameter `label=` inside `geom_text()` define which column supplies the text. We also dictate the color and size of the text.
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+library(tidyverse)
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id)) +
+  geom_tile(color="black", size=0.5, stat="identity", fill='white') +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic()
+
+p
+```
+
+<br>
+
+There are a number of other things that are wrong with this plot.  First, it is more readable to have the labels on the x-axis at the top of the plot. We can do this as follows, while also labeling the axes with new titles:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- p + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner")
+  
+p
+
+```
+
+<br>
+
+It still isn't quite right.  We can adjust a number of other `theme` elements to make the plot look better:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- p + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) 
+
+p
+
+
+```
+
+<br>
+
+This looks better, but it still has three issues. The ids are in alphabetical order as opposed to being in dominance order.  The matrix is full of zeros which make it harder to read. Finally, all tiles are filled with white, when it would be more readable to fill with a color that depicts the value of the cell/tile.
+
+
+Let's first remove the zeros.  This should be done when we create the data.frame after melting. We substitute zeros with `NA`s.
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+m.dat[m.dat == 0] <- NA
+head(m.dat)
+tail(m.dat)
+```
+
+<br>
+
+We can now replot using the same plotting code as above:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id)) +
+  geom_tile(color="black", size=0.5, stat="identity", fill='white') +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) 
+
+p
+
+```
+
+<br>
+
+Reordering the order of individuals on the rows and columns requires a bit more thought. The best way to reorder would be based on some measure of dominance. For this example, we are going to choose to reorder the ids based on David's Scores. We could pick other ranking methods though such as I&SI.
+
+To reorder by David's Scores, we first must calculate the David's Scores of each individual. We will use the `ds` function from the `compete` package:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+v <- ds(mouse)
+v
+```
+
+<br>
+
+We can reorder this vector and grab the names in descending order:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+v1 <- rev(names(v)[order(v)])
+
+v1
+
+
+```
+
+<br>
+
+Now we have the order of individuals by their dominance. We can factorize our two columns containing the individual ids and set their levels. We actually have to make the levels of the winners the reverse order.
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+m.dat$variable <- factor(m.dat$variable, levels=v1)
+m.dat$row.id <- factor(m.dat$row.id, levels = rev(v1))
+
+str(m.dat)
+
+```
+
+<br>
+
+We can now replot the sociomatrix with the order of the ids now set:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+p <- ggplot(m.dat, aes(x=variable, y=row.id)) +
+  geom_tile(color="black", size=0.5, stat="identity", fill='white') +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) 
+
+p
+
+```
+
+<br>
+
+David's Scores are a quick way of determining rank, but let's instead go with the more formal I&SI rankings. We can calculate these using the `isi98` function in the `compete` package:
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+isi <- isi98(mouse)
+
+isi
+
+
+```
+
+<br>
+We can graph the dominance rankings directly from the `$best_order` output. 
+
+It's noticeable that this order differs quite a bit from the David's Scores rankings:
+
+```{r}
+isi$best_order
+
+v1
+
+```
+
+<br>
+
+
+We will then refactor our two columns based on these rankings.
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+m.dat$variable <- factor(m.dat$variable, levels=isi$best_order)
+m.dat$row.id <- factor(m.dat$row.id, levels = rev(isi$best_order))
+
+str(m.dat)
+
+```
+
+<br>
+
+And we can replot the matrix based on this order
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+p <- ggplot(m.dat, aes(x=variable, y=row.id)) +
+  geom_tile(color="black", size=0.5, stat="identity", fill='white') +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) 
+
+p
+```
+
+<br>
+
+
+This now is starting to look like a proper sociomatrix.  There are however quite a few numbers under the diagonal. It's not immediately obvious which numbers are inconsistencies - i.e. when the individual in the row is a winner over the individual in the column. For instance, L beats F 2 times, whereas F beats L 1 time only. Therefore this is an inconsistent relationship. However, L beats H 2 times, but H beats L 5 times, so this is not inconsistent. 
+One way we could fill these tiles would just be based on the value of the cell. This can be done using `scale_fill_gradient()`. To this we need to supply a fill color for the lowest value (which is actually 1 not 0 as we removed them) and a fill color for the highest value. We also need to add `fill=value` inside the `ggplot()` function - we also remove `fill="white"` from the `geom_tile()` function.
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=value)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+  
+```
+
+<br>
+
+This looks ok, but the shading is heavily skewed by the highest value. One alternatively strategy would be to log the value column, and supply that information as the new fill value. To do this, we would add a new column to the data.frame.
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+m.dat$value_log <- log(m.dat$value)
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=value_log)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+
+
+
+```
+
+<br>
+
+This looks a bit better. 
+
+Another way to represent the relationships is by filling the tile with a shade of color that represents the directional consistency of each relationship.
+
+We can do that by adding a new column to the data.frame which represents the directional consistency of each measure. We can calculate this directly from the original matrix. 
+
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+dcs <- mouse / (mouse + t(mouse))
+m.dat$DC <- reshape2::melt(dcs)[,2]
+
+head(m.dat)
+tail(m.dat)
+```
+
+<br>
+
+
+Now we can plot based on this measure:
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=DC)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+
+
+
+```
+
+<br>
+
+Except this looks confusing. It would be better only to color the tiles when the animal is dominant and exclude those who are not.  
+
+We can check for each pair of individuals which has the highest directional consistency by checking the matrix of directional consistencies against its transpose.  We then assign a `NA` to any cell that is not greater than its transpose:
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+dcs[dcs<=t(dcs)]<-NA
+dcs
+
+
+```
+
+<br>
+
+We now can `melt` this matrix to provide the new fill values of directional consistency and use those for plotting:
+
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+m.dat$DC1 <- reshape2::melt(dcs)[,2] # only need 2nd column of melt output
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=DC1)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+
+
+```
+
+<br>
+
+But wait, there is actually however one mistake with this plot. Remeber that `scale_fill_manual()` fills the colors of the plot from lowest to highest, making the lowest equal to "white".  As we plotted the above plot based on `DC1`column which was only keeping the highest directional consistency value for each relationship, that means one of these "high" DC values is still the "lowest" in that column.  We can find it:
+
+```{r}
+min(m.dat$DC1,na.rm=T)
+
+which(m.dat$DC1 == min(m.dat$DC1,na.rm=T))
+
+m.dat[107,] # I vs K
+
+```
+
+It turns out that K beat I 4 times, and I beat K 3 times - giving K a directional consistency of 0.57 over I.  When looking at the above plot, you will notice that the tile in the row of K and column of I which has a 4 in it is white. Technically, this should be a very pale red color. 
+
+How do we fix this ?
+
+Essentially we need to put some DC values back into this column. But we need to choose wisely. Should we pick a value of 0?  This then might skew the range of colors, although DC does vary between 0 and 1.  Alternatively, we could pick 0.5 as we are only interested in looking at the higher DC values.
+
+In this example, I'll pick 0.5 as the cutoff value.  What we should do is replace and `NA` values in the `DC1` column with 0.5
+
+```{r}
+m.dat$DC1 <- ifelse(is.na(m.dat$DC1), 0.5, m.dat$DC1)
+tail(m.dat)
+```
+
+
+Now, let's replot:
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=DC1)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+
+```
+
+<br>
+
+Notice that now the tile K-I with a 4 in it is now filled with color, but all the others that should be white are still white.
+
+
+<br>
+
+## Dichotomized Sociomatrices
+
+We can plot dichotomized sociomatrices in two ways.  The first would be to use the function `get_di_matrix()` from the `compete` package to generate a dichotomized matrix. We would then go through similar steps as above.
+
+This is the dichotomized matrix:
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+get_di_matrix(mouse)
+
+```
+
+<br>
+
+Alternatively, if we have already gone through the above steps, we can simply piggy-back on the plot we just made based on the directional consistency.  In this plot, the only tiles that receive a color are those with a directional consistency above 0.5, which is exactly what we want for a dichotomized matrix.  All we need to do is replace the text values. We no longer want the raw values, but a 1 if their directional consistency is above 0.5.
+
+All we need to do is create a new value column and populate with 1s when the DC > 0.5 using an `ifelse()` statement:
+
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+m.dat$value1 <- ifelse(m.dat$DC1>.5, 1, NA)
+```
+
+<br>
+
+We can then replot putting in this new text:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+p <- ggplot(m.dat, aes(x=variable, y=row.id, fill=DC1)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value1), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+p 
+
+```
+
+<br>
+
+
+
+
+## Multiple Sociomatrices
+
+If we want to plot multiple sociomatrices we need to consider how to color the tiles.
+
+As an example here are some data that have three groups of four mice:
+
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+df <- read_csv("https://gist.githubusercontent.com/jalapic/98d09d5c98e28276e81d3bc3de3e3832/raw/2175e26485d5b9790c7ef48bf14f94a96e16a4b9/threegroups.csv")
+
+head(df)
+
+tail(df)
+
+```
+
+<br>
+
+We can look at the win-loss matrices from each of these three groups:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+mats <- split(df, df$Group) %>%
+  map(~ reshape2::acast(., id1~id2, value.var="value"))
+
+mats
+
+```
+
+<br>
+
+One approach would be to create three separate matrices and plot them side by side. Let's first create a plotting function that will color the tiles by the number of wins in each matrix. Then we'll apply that function to each of the three groups separately.
+
+
+Here is the function:
+
+```{r, warning=FALSE, message=FALSE, fig.width=6, fig.height=6}
+
+make_plot <- function(mat){
+
+# Although plotting by value, adding in code that would enable filling by DC  
+  
+# melt matrix back to df
+m.dat <- reshape2::melt(mat)
+m.dat <- data.frame(m.dat)
+m.dat <- m.dat[complete.cases(m.dat),] #removing NAs
+
+# remove 0s from value column
+m.dat$value <- ifelse(m.dat$value==0, NA, m.dat$value)
+
+# factorize ids by rank order 
+isi <- isi98(mat)
+m.dat$Var2 <- factor(m.dat$Var2, levels=isi$best_order)
+m.dat$Var1 <- factor(m.dat$Var1, levels = rev(isi$best_order))
+
+# create directional consistency column
+dcs <- mat / (mat + t(mat))
+m.dat$DC <- reshape2::melt(dcs)[,3]
+
+# create directional consistency column only >0.5
+dcs[dcs<=t(dcs)]<-NA
+m.dat$DC1 <- reshape2::melt(dcs)[,3]
+
+# put in .5 as minimum DC column
+m.dat$DC1 <- ifelse(is.na(m.dat$DC1), .5, m.dat$DC1)
+
+# put in 0 as minimum in value1 column for fill
+m.dat$value1 <- ifelse(is.na(m.dat$value), .5, m.dat$value)
+
+# plot  
+p <- ggplot(m.dat, aes(x=Var2, y=Var1, fill=value1)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+  scale_fill_gradient(
+    low = "white", 
+    high = "red1", 
+    space = "Lab", 
+    na.value = "white", 
+    guide = "colourbar")
+
+  
+  
+return(p)
+}
+
+
+
+
+
+```
+
+
+
+
+<br>
+
+Now we will create individual plots and put them together using `gridExtra`.
+
+```{r,echo=T, results='hide',warning=FALSE, message=FALSE}
+
+
+p1 <- make_plot(mats[[1]])
+p2 <- make_plot(mats[[2]])
+p3 <- make_plot(mats[[3]])
+
+
+```
+
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=9, fig.height=3}
+
+library(gridExtra)
+
+grid.arrange(p1,p2,p3, nrow=1)
+
+
+```
+
+<br>
+
+Hopefully you notice what the problem is with this approach. The highest value in each matrix(15, 6, 33) is the same shade of red which is misleading.
+
+
+What we have to do instead is scale the fill color based on the whole range of values across all matrices.
+
+The best way to do this is to have all of the data in one dataframe and create a scale based on the value column. We can do that as follows:
+
+```{r}
+
+df$scale_value <- (df$value-min(df$value)) / ((max(df$value)-min(df$value)))
+head(df)
+
+```
+
+<br>
+
+We next have to piece that scale_value back. The best way to do this is to start right back from the original data.frame including all groups. But before we do that, let's create all the data.frames we need for plotting and store them in a list:
+
+```{r, warning=FALSE, message=FALSE, echo=T, results='hide'}
+
+# Get matrices
+mats <- split(df, df$Group) %>%
+  map(~ reshape2::acast(., id1~id2, value.var="value"))
+
+# make dataframe for plotting
+dx <- mats %>%
+  map(~ reshape2::melt(.)) %>%
+  map(~ data.frame(.)) %>%
+  map(~ mutate(., value0 = ifelse(value==0, NA, value)))
+
+
+# get rank orders
+l <- lapply(mats, isi98) %>% map(~ .$best_order)
+
+
+
+```
+
+<br>
+
+
+We can look at these like this:
+
+```{r, warning=FALSE, message=FALSE}
+lapply(dx, head)
+```
+
+<br>
+
+Next we need to add the scale column. Again, we can do this to each element of the list using a loop:
+
+```{r, warning=FALSE, message=FALSE}
+
+df.l <- split(df, df$Group)
+
+out <- NULL
+for(i in 1:length(l)){
+df.l[[i]]$Var1 <- df.l[[i]]$id1
+df.l[[i]]$Var2 <- df.l[[i]]$id2
+out[[i]] <- full_join(dx[[i]],df.l[[i]])  
+
+
+# factorize
+  out[[i]]$Var2 <- factor(out[[i]]$Var2, levels=l[[i]])
+  out[[i]]$Var1 <- factor(out[[i]]$Var1, levels = rev(l[[i]]))
+}
+
+
+
+
+
+
+lapply(out,head)
+
+```
+
+<br>
+
+We can very nearly do the plotting. However, there is still one thing to fix. Previously, the `scale_fill_manual()` worked by setting a range between two colors based on the values in a particular column.  This time, we want the fill to be based on the `scale_value` column which ranges from 0 to 1 across the data but may range between any values in between for any given data.frame.  Therefore, we need to scale the fill slightly differently.
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+make_scale_plot <- function(df){
+p <- ggplot(df, aes(x=Var2, y=Var1, fill=scale_value)) +
+  geom_tile(color="black", size=0.5, stat="identity") +
+  geom_text(aes(label = value0), color="black", size=rel(3.5)) +
+  theme_classic() + 
+  scale_x_discrete(expand = c(0, 0), position = "top") +
+  scale_y_discrete(expand = c(0, 0)) +
+  xlab("Loser") + 
+  ylab("Winner") + 
+  theme(axis.text.x = element_text(vjust = 1),
+        axis.text.y = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.background = element_rect(fill="white"),
+        plot.background = element_rect(fill="white"),
+        axis.text = element_text(color="#3C3C3C", size=rel(1.1)),
+        legend.position = "none"        
+  ) +
+scale_fill_gradientn(
+  limits = c(0,1),
+  colors=c("white", "red1")
+)
+  
+return(p)
+
+}
+
+
+```
+
+<br>
+
+We can finally plot each matrix side-by-side:
+
+
+```{r, warning=FALSE, message=FALSE}
+
+pp1 <- make_scale_plot(out[[1]])
+pp2 <- make_scale_plot(out[[2]])
+pp3 <- make_scale_plot(out[[3]])
+
+```
+
+<br>
+
+
+```{r, warning=FALSE, message=FALSE, fig.width=9, fig.height=3}
+
+grid.arrange(pp1,pp2,pp3, nrow=1)
+
+```
+
+<br>
+
+There are clearly many improvements that could be made. The code could definitely be cleaned up for the multiple sociomatrices. We also probably don't want to have "Winner" and "Loser" labels on every matrix.  There are probably other things we could do better too.
+
+<br>
+
+
+<br>
+

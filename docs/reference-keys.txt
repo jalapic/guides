@@ -24,4 +24,7 @@ glicko-ratings
 stability-indices
 temporal-social-dynamics
 summary
-next-section
+plotting-sociomatrices-1
+raw-sociomatrices
+dichotomized-sociomatrices
+multiple-sociomatrices
