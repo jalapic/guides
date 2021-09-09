@@ -14,13 +14,13 @@ Also see [this primer](https://kateto.net/netscix2016.html
 There has been a lot of recent discussion about the utility and appropriateness of permutation methods in social networks. See these papers for more information:
 
 
-- [Weiss MN et al. 2021, Common datastream permutations of animal social network data are not appropriate for hypothesis testing using regression models, Methods Ecol Evol](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13508)
+* [Weiss MN et al. 2021, Common datastream permutations of animal social network data are not appropriate for hypothesis testing using regression models, Methods Ecol Evol](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13508)
 
--[Farine DR, 2017, A guide to null models for animal social network analysis, Methods Ecol Evol](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5656331/)
+* [Farine DR, 2017, A guide to null models for animal social network analysis, Methods Ecol Evol](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5656331/)
 
--[Hart JDA et al. preprint, Common Permutation Methods in Animal Social Network Analysis Do Not Control for Non-independence](https://www.biorxiv.org/content/10.1101/2021.06.04.447124v1.abstract)
+* [Hart JDA et al. preprint, Common Permutation Methods in Animal Social Network Analysis Do Not Control for Non-independence](https://www.biorxiv.org/content/10.1101/2021.06.04.447124v1.abstract)
 
--[Farine DR & Carter GG, preprint, Permutation tests for hypothesis testing with animal social data: problems and potential solutions](https://www.biorxiv.org/content/10.1101/2020.08.02.232710v1)
+* [Farine DR & Carter GG, preprint, Permutation tests for hypothesis testing with animal social data: problems and potential solutions](https://www.biorxiv.org/content/10.1101/2020.08.02.232710v1)
 
 
 I will write longer examples of some of the issues raised in these papers soon. First, we'll discuss some very basic ideas of what permutations can be.
@@ -60,7 +60,6 @@ set.seed(549)
 ```{r, warning=FALSE, message=FALSE}
 
 df <- data.frame(t(replicate(50,sample(LETTERS[1:20],2,F))))
-df <- df[df$X1!=df$X2,]
 df
 ```
 <br>
@@ -71,9 +70,7 @@ When working with networks in R, we can convert such edgelists into igraph objec
 ```{r, warning=FALSE, message=FALSE}
 library(igraph)
 g <- graph_from_data_frame(df)
-E(g)$weight <-1
 g <- as.undirected(g)
-E(g)$weight
 g <- simplify(g)
 
 g
@@ -105,7 +102,7 @@ From the above graph, it looks like perhaps invididual groups are associating pr
 
 ```{r, warning=FALSE, message=FALSE}
 
-ast <- assortativity(g, types1 = as.numeric(factor(V(g)$color)))
+ast <- assortativity(g, types1 = as.numeric(factor(V(g)$color)), directed=F)
 
 ast 
 ```
@@ -124,7 +121,7 @@ We have now fully shuffled the color membership.
 We could then recalculate the assortativity for this one sample of shuffled group memberships and see if it was higher or lower than our original one. 
 
 ```{r}
-assortativity(g, types1 = as.numeric(factor(x)))
+assortativity(g, types1 = as.numeric(factor(x)), directed=F)
 
 ```
 As we can see, this value is positive but slightly lower than our original value. We could repeat this process many times.
@@ -134,16 +131,16 @@ Below, I have repeated the process four times and have plotted the resulting net
 
 ```{r, warning=FALSE, message=FALSE,fig.height=8, fig.width=5}
 
-
+g1<-g
 par(mfrow = c(2, 2))
 par(mar=c(1,1,1,1))
 ast.i<-NULL
 for(i in 1:4){
-V(g)$color <- sample(nodes$color)
-ast.i <- assortativity(g, types1 = as.numeric(factor(V(g)$color)))
-plot(g, 
+V(g1)$color <- sample(nodes$color)
+ast.i <- assortativity(g1, types1 = as.numeric(factor(V(g1)$color)), directed=F)
+plot(g1, 
      layout=layout_with_lgl, 
-     color = V(g)$color,
+     color = V(g1)$color,
      main = paste0("Asst = ", round(ast.i,2)),
      vertex.label.color="black"
      )
@@ -173,7 +170,7 @@ results[[i]] <- assortativity(g, types1 = as.numeric(factor(sample(V(g)$color)))
 ```
 <br>
 
-We can plot the distribution of these results and overlay our original assortativity value of 0.2.
+We can plot the distribution of these results and overlay our original assortativity value of 0.21.
 
 ```{r, warning=FALSE, message=FALSE, fig.width=5, fig.height=5}
 
@@ -196,11 +193,90 @@ sum(results>ast)/nperms
 ```
 <br>
 
-This demonstrates that only 2.71% of permutations (271 out of 10,000) led to assortativity values greater than our observed value.  We may conclude from this that our assortativity is significantly positive-  suggesting there is a relationship between group membership and network position. i.e. that similar group members are more likely than chance to associate with each other.
+This demonstrates that only 2.78% of permutations (278 out of 10,000) led to assortativity values greater than our observed value.  We may conclude from this that our assortativity is significantly positive-  suggesting there is a relationship between group membership and network position. i.e. that similar group members are more likely than chance to associate with each other.
 
 
 <br>
 
+
+### Random Graph Approach
+
+Another approach that is taken is to compare our observed finding to a distribution of random graphs that have similar properties to our observed graph.  The main issue with this approach in animal behavior is that it is incredibly difficult to really produce random graphs that have similar enough properties to our observed data. Therefore the below is just a demonstration of this approach rather than a recommendation.
+
+In our observed graph had 20 nodes and 43 undirected edges:
+
+
+```{r, warning=FALSE, message=FALSE}
+g
+```
+<br>
+
+One random graph we could generate is a Erdos-Renyi graph. With this graph we can generate random graphs that contain the same number of nodes and edges as our observed one. 
+
+```{r, warning=FALSE, message=FALSE, fig.height=5, fig.width=5}
+
+r1 <- sample_gnm(n=20, m=43) 
+V(r1)$color <- nodes$color
+plot(r1, layout=layout_with_lgl, vertex.label.color="black")
+
+
+```
+<br>
+
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+assortativity(r1, types1 = rep(1:4, each=5), directed = FALSE)
+
+```
+<br>
+
+We can see with our one random Erdos-Renyi graph that the assortativity between nodes and group membership is only 0.02.  Again, we could repeat this process for thousands of randomly generated graphs with 20 nodes and 43 edges and observe the distribution:
+
+
+
+```{r, warning=FALSE, message=FALSE}
+nperms1 <- 10000
+results1 <- vector('numeric',nperms1)
+
+for(i in 1:nperms1){
+
+  r <- sample_gnm(n=20, m=43) 
+
+results1[[i]] <- assortativity(r, types1 = rep(1:4, each=5), directed = FALSE)
+
+}
+
+```
+<br>
+
+We can again plot the distribution of these results and overlay our original assortativity value of 0.2.
+
+```{r, warning=FALSE, message=FALSE, fig.width=5, fig.height=5}
+
+library(tidyverse)
+
+ggplot(data = data.frame(results1), aes(x=results1)) +
+  geom_histogram(color='black',fill='dodgerblue', binwidth = 0.02) +
+  theme_classic() +
+  geom_vline(xintercept = ast, lwd=1, lty=2, color="red")
+
+
+
+```
+
+And, again, we can calculate the p-value by determining what proportion of random graphs have values of assortativity greater than our observed value of 0.21
+
+```{r, warning=FALSE, message=FALSE}
+sum(results1>ast)/nperms
+
+```
+<br>
+
+This time our p-value is p=0.0204.  So this method gave us a similar p-value to our node permutation method.  
 
 
 ```{r, warning=FALSE, message=FALSE}
@@ -237,28 +313,5 @@ This demonstrates that only 2.71% of permutations (271 out of 10,000) led to ass
 ```
 <br>
 
-
-
-```{r, warning=FALSE, message=FALSE}
-```
-<br>
-
-
-
-```{r, warning=FALSE, message=FALSE}
-```
-<br>
-
-
-
-```{r, warning=FALSE, message=FALSE}
-```
-<br>
-
-
-
-```{r, warning=FALSE, message=FALSE}
-```
-<br>
 
 
