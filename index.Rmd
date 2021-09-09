@@ -7,5 +7,5 @@ site: bookdown::bookdown_site
 
 # Introduction
 
-text
+This set of pages is intended for students in the Curley Lab, Department of Psychology, University of Texas at Austin. It contains code examples that might be useful for learning some of the methods that we use in our lab. Others may also find it useful - but it is written with my lab members in mind, so apologies if some things are left unexplained.
 

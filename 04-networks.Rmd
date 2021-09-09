@@ -1,0 +1,201 @@
+# Social Networks
+
+<br>
+
+This section will contain some examples of topics we need to consider in social network analysis. This chapter is intended for students working in my lab who are interested in social network analysis. It is a work in progress (i.e. I've barely scratched the surface). I have some materials for social network analysis [available on GitHub](https://github.com/jalapic/SNA_workshop).
+
+<br>
+
+## Permutation Methods
+
+There has been a lot of recent discussion about the utility and appropriateness of permutation methods in social networks. See these papers for more information:
+
+
+- [Weiss MN et al. 2021, Common datastream permutations of animal social network data are not appropriate for hypothesis testing using regression models, Methods Ecol Evol](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13508)
+
+-[Farine DR, 2017, A guide to null models for animal social network analysis, Methods Ecol Evol](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5656331/)
+
+-[Hart JDA et al. preprint, Common Permutation Methods in Animal Social Network Analysis Do Not Control for Non-independence](https://www.biorxiv.org/content/10.1101/2021.06.04.447124v1.abstract)
+
+-[Farine DR & Carter GG, preprint, Permutation tests for hypothesis testing with animal social data: problems and potential solutions](https://www.biorxiv.org/content/10.1101/2020.08.02.232710v1)
+
+
+I will write longer examples of some of the issues raised in these papers soon. First, we'll discuss some very basic ideas of what permutations can be.
+
+<br>
+
+
+### Node Permutation Example
+
+Imagine with have a network with 
+
+
+https://kateto.net/netscix2016.html
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+ids <- LETTERS[1:20]
+colors <- c("red","blue","yellow","white")
+names(ids) <- rep(colors, each=5)
+ids
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+nodes <- data.frame(ids,rep(colors, each=5))
+nodes
+
+```
+<br>
+
+
+Get interactions.
+
+```{r, warning=FALSE, message=FALSE}
+
+df <- data.frame(t(replicate(50,sample(LETTERS,2,F))))
+df <- df[df$X1!=df$X2,]
+
+table(df$X1,df$X2)
+
+
+```
+<br>
+
+
+
+
+
+```{r, warning=FALSE, message=FALSE}
+library(igraph)
+g <- graph_from_data_frame(df)
+E(g)$weight <-1
+g <- as.undirected(g)
+g
+E(g)$weight
+#net.sp <- delete_edges(net, E(net)[weight<cut.off])
+
+g <- simplify(g)
+
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+
+plot(g, layout=layout_with_lgl, col=)
+
+
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
+
+```{r, warning=FALSE, message=FALSE}
+```
+<br>
+
+
