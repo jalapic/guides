@@ -28,3 +28,6 @@ plotting-sociomatrices-1
 raw-sociomatrices
 dichotomized-sociomatrices
 multiple-sociomatrices
+social-networks
+permutation-methods
+node-permutation-example

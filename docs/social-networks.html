@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Social Networks | Curley Lab Code Tutorials</title>
+  <meta name="description" content="Chapter 4 Social Networks | Curley Lab Code Tutorials" />
+  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Social Networks | Curley Lab Code Tutorials" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Social Networks | Curley Lab Code Tutorials" />
+  
+  
+  
+
+<meta name="author" content="James Curley" />
+
+
+<meta name="date" content="2021-09-09" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="plotting-sociomatrices-1.html"/>
+
+<script src="libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Code Tutorials</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
+<li class="chapter" data-level="2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html"><i class="fa fa-check"></i><b>2</b> Analyzing Social Hierarchy Data</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#overview"><i class="fa fa-check"></i><b>2.1</b> Overview</a></li>
+<li class="chapter" data-level="2.2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#raw-data"><i class="fa fa-check"></i><b>2.2</b> Raw Data</a></li>
+<li class="chapter" data-level="2.3" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#data-cleanup"><i class="fa fa-check"></i><b>2.3</b> Data Cleanup</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#time-formats"><i class="fa fa-check"></i><b>2.3.1</b> Time Formats</a></li>
+<li class="chapter" data-level="2.3.2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#actorrecipients"><i class="fa fa-check"></i><b>2.3.2</b> Actor/Recipients</a></li>
+</ul></li>
+<li class="chapter" data-level="2.4" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#data-analysis"><i class="fa fa-check"></i><b>2.4</b> Data Analysis</a>
+<ul>
+<li class="chapter" data-level="2.4.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#create-sociomatrices"><i class="fa fa-check"></i><b>2.4.1</b> Create Sociomatrices</a></li>
+</ul></li>
+<li class="chapter" data-level="2.5" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#basic-hierarchy-measures"><i class="fa fa-check"></i><b>2.5</b> Basic hierarchy Measures</a>
+<ul>
+<li class="chapter" data-level="2.5.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#descriptives"><i class="fa fa-check"></i><b>2.5.1</b> Descriptives</a></li>
+<li class="chapter" data-level="2.5.2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#directional-consistency"><i class="fa fa-check"></i><b>2.5.2</b> Directional Consistency</a></li>
+<li class="chapter" data-level="2.5.3" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#de-vries-modified-h-value"><i class="fa fa-check"></i><b>2.5.3</b> De Vries’ Modified h’ value</a></li>
+<li class="chapter" data-level="2.5.4" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#triangle-transitivity"><i class="fa fa-check"></i><b>2.5.4</b> Triangle Transitivity</a></li>
+<li class="chapter" data-level="2.5.5" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#steepness"><i class="fa fa-check"></i><b>2.5.5</b> Steepness</a></li>
+</ul></li>
+<li class="chapter" data-level="2.6" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#individual-ranking-measures"><i class="fa fa-check"></i><b>2.6</b> Individual Ranking Measures</a>
+<ul>
+<li class="chapter" data-level="2.6.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#davids-scores"><i class="fa fa-check"></i><b>2.6.1</b> David’s Scores</a></li>
+<li class="chapter" data-level="2.6.2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#isi-method"><i class="fa fa-check"></i><b>2.6.2</b> I&amp;SI Method</a></li>
+<li class="chapter" data-level="2.6.3" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#despotism"><i class="fa fa-check"></i><b>2.6.3</b> Despotism</a></li>
+</ul></li>
+<li class="chapter" data-level="2.7" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#plotting-sociomatrices"><i class="fa fa-check"></i><b>2.7</b> Plotting Sociomatrices</a></li>
+<li class="chapter" data-level="2.8" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#network-certainty"><i class="fa fa-check"></i><b>2.8</b> Network Certainty</a></li>
+<li class="chapter" data-level="2.9" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#temporal-based-methods"><i class="fa fa-check"></i><b>2.9</b> Temporal Based Methods</a>
+<ul>
+<li class="chapter" data-level="2.9.1" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#glicko-ratings"><i class="fa fa-check"></i><b>2.9.1</b> Glicko Ratings</a></li>
+<li class="chapter" data-level="2.9.2" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#stability-indices"><i class="fa fa-check"></i><b>2.9.2</b> Stability Indices</a></li>
+<li class="chapter" data-level="2.9.3" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#temporal-social-dynamics"><i class="fa fa-check"></i><b>2.9.3</b> Temporal Social Dynamics</a></li>
+</ul></li>
+<li class="chapter" data-level="2.10" data-path="analyzing-social-hierarchy-data.html"><a href="analyzing-social-hierarchy-data.html#summary"><i class="fa fa-check"></i><b>2.10</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="plotting-sociomatrices-1.html"><a href="plotting-sociomatrices-1.html"><i class="fa fa-check"></i><b>3</b> Plotting Sociomatrices</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="plotting-sociomatrices-1.html"><a href="plotting-sociomatrices-1.html#raw-sociomatrices"><i class="fa fa-check"></i><b>3.1</b> Raw Sociomatrices</a></li>
+<li class="chapter" data-level="3.2" data-path="plotting-sociomatrices-1.html"><a href="plotting-sociomatrices-1.html#dichotomized-sociomatrices"><i class="fa fa-check"></i><b>3.2</b> Dichotomized Sociomatrices</a></li>
+<li class="chapter" data-level="3.3" data-path="plotting-sociomatrices-1.html"><a href="plotting-sociomatrices-1.html#multiple-sociomatrices"><i class="fa fa-check"></i><b>3.3</b> Multiple Sociomatrices</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="social-networks.html"><a href="social-networks.html"><i class="fa fa-check"></i><b>4</b> Social Networks</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="social-networks.html"><a href="social-networks.html#permutation-methods"><i class="fa fa-check"></i><b>4.1</b> Permutation Methods</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="social-networks.html"><a href="social-networks.html#node-permutation-example"><i class="fa fa-check"></i><b>4.1.1</b> Node Permutation Example</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Curley Lab Code Tutorials</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="social-networks" class="section level1" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Social Networks</h1>
+<p><br></p>
+<p>This section will contain some examples of topics we need to consider in social network analysis. This chapter is intended for students working in my lab who are interested in social network analysis. It is a work in progress (i.e. I’ve barely scratched the surface). I have some materials for social network analysis <a href="https://github.com/jalapic/SNA_workshop">available on GitHub</a>.</p>
+<p>Also see <a href="https://kateto.net/netscix2016.html">this primer</a> for more information on how to use <code>igraph</code>.</p>
+<p><br></p>
+<div id="permutation-methods" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Permutation Methods</h2>
+<p>There has been a lot of recent discussion about the utility and appropriateness of permutation methods in social networks. See these papers for more information:</p>
+<ul>
+<li><a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.13508">Weiss MN et al. 2021, Common datastream permutations of animal social network data are not appropriate for hypothesis testing using regression models, Methods Ecol Evol</a></li>
+</ul>
+<p>-<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5656331/">Farine DR, 2017, A guide to null models for animal social network analysis, Methods Ecol Evol</a></p>
+<p>-<a href="https://www.biorxiv.org/content/10.1101/2021.06.04.447124v1.abstract">Hart JDA et al. preprint, Common Permutation Methods in Animal Social Network Analysis Do Not Control for Non-independence</a></p>
+<p>-<a href="https://www.biorxiv.org/content/10.1101/2020.08.02.232710v1">Farine DR &amp; Carter GG, preprint, Permutation tests for hypothesis testing with animal social data: problems and potential solutions</a></p>
+<p>I will write longer examples of some of the issues raised in these papers soon. First, we’ll discuss some very basic ideas of what permutations can be.</p>
+<p><br></p>
+<div id="node-permutation-example" class="section level3" number="4.1.1">
+<h3><span class="header-section-number">4.1.1</span> Node Permutation Example</h3>
+<p>Imagine with have a network with 20 individuals. They are split into four different groups. We’ll label these groups red, blue, yellow and white.</p>
+<div class="sourceCode" id="cb166"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb166-1"><a href="social-networks.html#cb166-1" aria-hidden="true" tabindex="-1"></a>ids <span class="ot">&lt;-</span> LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>]</span>
+<span id="cb166-2"><a href="social-networks.html#cb166-2" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;yellow&quot;</span>,<span class="st">&quot;white&quot;</span>)</span>
+<span id="cb166-3"><a href="social-networks.html#cb166-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ids) <span class="ot">&lt;-</span> <span class="fu">rep</span>(colors, <span class="at">each=</span><span class="dv">5</span>)</span>
+<span id="cb166-4"><a href="social-networks.html#cb166-4" aria-hidden="true" tabindex="-1"></a>ids</span></code></pre></div>
+<pre><code>##    red    red    red    red    red   blue   blue   blue   blue 
+##    &quot;A&quot;    &quot;B&quot;    &quot;C&quot;    &quot;D&quot;    &quot;E&quot;    &quot;F&quot;    &quot;G&quot;    &quot;H&quot;    &quot;I&quot; 
+##   blue yellow yellow yellow yellow yellow  white  white  white 
+##    &quot;J&quot;    &quot;K&quot;    &quot;L&quot;    &quot;M&quot;    &quot;N&quot;    &quot;O&quot;    &quot;P&quot;    &quot;Q&quot;    &quot;R&quot; 
+##  white  white 
+##    &quot;S&quot;    &quot;T&quot;</code></pre>
+<p><br></p>
+<p>We can also store this same data as a data.frame giving each node and its group membership (which we’ll call <code>color</code>).</p>
+<div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="social-networks.html#cb168-1" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ids,<span class="at">color =</span> <span class="fu">rep</span>(colors, <span class="at">each=</span><span class="dv">5</span>))</span>
+<span id="cb168-2"><a href="social-networks.html#cb168-2" aria-hidden="true" tabindex="-1"></a>nodes</span></code></pre></div>
+<pre><code>##    ids  color
+## 1    A    red
+## 2    B    red
+## 3    C    red
+## 4    D    red
+## 5    E    red
+## 6    F   blue
+## 7    G   blue
+## 8    H   blue
+## 9    I   blue
+## 10   J   blue
+## 11   K yellow
+## 12   L yellow
+## 13   M yellow
+## 14   N yellow
+## 15   O yellow
+## 16   P  white
+## 17   Q  white
+## 18   R  white
+## 19   S  white
+## 20   T  white</code></pre>
+<p><br></p>
+<p>We are going to simulate some interactions between these individuals. That is, we are going to create an edgelist. The following code produces 50 interactions between pairs of individuals:</p>
+<div class="sourceCode" id="cb170"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb170-1"><a href="social-networks.html#cb170-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="fu">t</span>(<span class="fu">replicate</span>(<span class="dv">50</span>,<span class="fu">sample</span>(LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>],<span class="dv">2</span>,F))))</span>
+<span id="cb170-2"><a href="social-networks.html#cb170-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>X1<span class="sc">!=</span>df<span class="sc">$</span>X2,]</span>
+<span id="cb170-3"><a href="social-networks.html#cb170-3" aria-hidden="true" tabindex="-1"></a>df</span></code></pre></div>
+<pre><code>##    X1 X2
+## 1   B  P
+## 2   C  G
+## 3   R  N
+## 4   P  E
+## 5   F  K
+## 6   S  E
+## 7   F  L
+## 8   H  C
+## 9   K  B
+## 10  F  J
+## 11  Q  O
+## 12  A  O
+## 13  S  B
+## 14  D  E
+## 15  A  H
+## 16  P  C
+## 17  A  E
+## 18  A  B
+## 19  J  G
+## 20  B  K
+## 21  G  Q
+## 22  K  J
+## 23  S  K
+## 24  T  E
+## 25  O  T
+## 26  E  R
+## 27  L  O
+## 28  Q  K
+## 29  N  Q
+## 30  Q  N
+## 31  S  T
+## 32  G  D
+## 33  F  L
+## 34  E  H
+## 35  B  I
+## 36  I  E
+## 37  D  O
+## 38  Q  G
+## 39  B  K
+## 40  A  H
+## 41  Q  L
+## 42  M  S
+## 43  J  A
+## 44  G  H
+## 45  A  D
+## 46  L  J
+## 47  O  L
+## 48  L  N
+## 49  P  E
+## 50  G  T</code></pre>
+<p><br></p>
+<p>When working with networks in R, we can convert such edgelists into igraph objects using the <code>igraph</code> package. In this example, we shall also add a weight category to each edge (this isn’t important for this example, just doing it out of habit), and make the graph undirected. We also simplify the graph:</p>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="social-networks.html#cb172-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(igraph)</span>
+<span id="cb172-2"><a href="social-networks.html#cb172-2" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">graph_from_data_frame</span>(df)</span>
+<span id="cb172-3"><a href="social-networks.html#cb172-3" aria-hidden="true" tabindex="-1"></a><span class="fu">E</span>(g)<span class="sc">$</span>weight <span class="ot">&lt;-</span><span class="dv">1</span></span>
+<span id="cb172-4"><a href="social-networks.html#cb172-4" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">as.undirected</span>(g)</span>
+<span id="cb172-5"><a href="social-networks.html#cb172-5" aria-hidden="true" tabindex="-1"></a><span class="fu">E</span>(g)<span class="sc">$</span>weight</span></code></pre></div>
+<pre><code>##  [1] 4 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1
+## [32] 1 1 1 1 1 2 1 2 1 1 1 1</code></pre>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="social-networks.html#cb174-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">simplify</span>(g)</span>
+<span id="cb174-2"><a href="social-networks.html#cb174-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb174-3"><a href="social-networks.html#cb174-3" aria-hidden="true" tabindex="-1"></a>g</span></code></pre></div>
+<pre><code>## IGRAPH 3e3d6d5 UNW- 20 43 -- 
+## + attr: name (v/c), weight (e/n)
+## + edges from 3e3d6d5 (vertex names):
+##  [1] B--P C--P B--S C--H B--K F--K S--K K--Q B--A H--A H--A A--D
+## [13] F--J K--J A--J C--G H--G Q--G D--G J--G S--T G--T Q--O A--O
+## [25] D--O T--O R--E P--E S--E H--E A--E D--E T--E F--L Q--L J--L
+## [37] O--L R--N Q--N L--N B--I E--I S--M</code></pre>
+<p><br></p>
+<p>The above output shows the <code>igraph</code> object.</p>
+<p>Next, we shall use some code to add a <code>color</code> class to each node. We do this by matching the names of the vertices <code>V(g)$name</code> with the names in the nodes data.frame.</p>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="social-networks.html#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(g)<span class="sc">$</span>color <span class="ot">&lt;-</span> nodes<span class="sc">$</span>color[<span class="fu">match</span>( <span class="fu">V</span>(g)<span class="sc">$</span>name, nodes<span class="sc">$</span>ids ) ]</span>
+<span id="cb176-2"><a href="social-networks.html#cb176-2" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(g)<span class="sc">$</span>color</span></code></pre></div>
+<pre><code>##  [1] &quot;red&quot;    &quot;red&quot;    &quot;white&quot;  &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;blue&quot;  
+##  [8] &quot;yellow&quot; &quot;white&quot;  &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;blue&quot;   &quot;white&quot; 
+## [15] &quot;yellow&quot; &quot;red&quot;    &quot;yellow&quot; &quot;yellow&quot; &quot;blue&quot;   &quot;yellow&quot;</code></pre>
+<p><br></p>
+<p>We can now plot our network by group membership. Each color represents a different group. Our question of interest is <strong>Do individuals from the same group show preferential attachment to each other?</strong>.</p>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="social-networks.html#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(g, <span class="at">layout=</span>layout_with_lgl, <span class="at">vertex.label.color=</span><span class="st">&quot;black&quot;</span>)</span></code></pre></div>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-251-1.png" width="480" />
+<br></p>
+<p>From the above graph, it looks like perhaps invididual groups are associating preferentially which each other. We can formally measure that by calculating the assortativity. It ranges from -1 to 1. 1 indicates complete association by group membership. 0 indicates no relationship between group membership and association. -1 means that group members preferentially avoid each other. The <code>assortativity</code> function in <code>igraph</code> helps calculate this:</p>
+<div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="social-networks.html#cb179-1" aria-hidden="true" tabindex="-1"></a>ast <span class="ot">&lt;-</span> <span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(<span class="fu">V</span>(g)<span class="sc">$</span>color)))</span>
+<span id="cb179-2"><a href="social-networks.html#cb179-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb179-3"><a href="social-networks.html#cb179-3" aria-hidden="true" tabindex="-1"></a>ast </span></code></pre></div>
+<pre><code>## [1] 0.2073733</code></pre>
+<p><br></p>
+<p>How can we test whether this assortativity value of 0.21 is especially high? There are different methods we could employ. We could do a data permutation, where we shuffle the raw data. Alternatively, we could do a node permutation - essentially, we would randomize our group membership.</p>
+<p>The simplest way to change the group membership would be to permute (shuffle) the node color category and reassign. For example if we do:</p>
+<div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb181-1"><a href="social-networks.html#cb181-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sample</span>(nodes<span class="sc">$</span>color)</span>
+<span id="cb181-2"><a href="social-networks.html#cb181-2" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
+<pre><code>##  [1] &quot;blue&quot;   &quot;red&quot;    &quot;blue&quot;   &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;white&quot; 
+##  [8] &quot;white&quot;  &quot;yellow&quot; &quot;yellow&quot; &quot;red&quot;    &quot;white&quot;  &quot;yellow&quot; &quot;red&quot;   
+## [15] &quot;yellow&quot; &quot;blue&quot;   &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;yellow&quot;</code></pre>
+<p>We have now fully shuffled the color membership.</p>
+<p>We could then recalculate the assortativity for this one sample of shuffled group memberships and see if it was higher or lower than our original one.</p>
+<div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb183-1"><a href="social-networks.html#cb183-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(x)))</span></code></pre></div>
+<pre><code>## [1] 0.1241303</code></pre>
+<p>As we can see, this value is positive but slightly lower than our original value. We could repeat this process many times.</p>
+<p>Below, I have repeated the process four times and have plotted the resulting networks along with their assortativity:</p>
+<div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="social-networks.html#cb185-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb185-2"><a href="social-networks.html#cb185-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb185-3"><a href="social-networks.html#cb185-3" aria-hidden="true" tabindex="-1"></a>ast.i<span class="ot">&lt;-</span><span class="cn">NULL</span></span>
+<span id="cb185-4"><a href="social-networks.html#cb185-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>){</span>
+<span id="cb185-5"><a href="social-networks.html#cb185-5" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(g)<span class="sc">$</span>color <span class="ot">&lt;-</span> <span class="fu">sample</span>(nodes<span class="sc">$</span>color)</span>
+<span id="cb185-6"><a href="social-networks.html#cb185-6" aria-hidden="true" tabindex="-1"></a>ast.i <span class="ot">&lt;-</span> <span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(<span class="fu">V</span>(g)<span class="sc">$</span>color)))</span>
+<span id="cb185-7"><a href="social-networks.html#cb185-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(g, </span>
+<span id="cb185-8"><a href="social-networks.html#cb185-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">layout=</span>layout_with_lgl, </span>
+<span id="cb185-9"><a href="social-networks.html#cb185-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">color =</span> <span class="fu">V</span>(g)<span class="sc">$</span>color,</span>
+<span id="cb185-10"><a href="social-networks.html#cb185-10" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="fu">paste0</span>(<span class="st">&quot;Asst = &quot;</span>, <span class="fu">round</span>(ast.i,<span class="dv">2</span>)),</span>
+<span id="cb185-11"><a href="social-networks.html#cb185-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">vertex.label.color=</span><span class="st">&quot;black&quot;</span></span>
+<span id="cb185-12"><a href="social-networks.html#cb185-12" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb185-13"><a href="social-networks.html#cb185-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb185-14"><a href="social-networks.html#cb185-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-255-1.png" width="480" />
+<br></p>
+<p>Three of these values are negative and one is a small positive. So they are all therefore below our original observed value.</p>
+<p>We could redo this thousands of times and get a distribution of assortativity values for shuffled (permuted) nodes. Below we do this in a loop 10,000 times:</p>
+<div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="social-networks.html#cb186-1" aria-hidden="true" tabindex="-1"></a>nperms <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb186-2"><a href="social-networks.html#cb186-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&#39;numeric&#39;</span>,nperms)</span>
+<span id="cb186-3"><a href="social-networks.html#cb186-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb186-4"><a href="social-networks.html#cb186-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nperms){</span>
+<span id="cb186-5"><a href="social-networks.html#cb186-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb186-6"><a href="social-networks.html#cb186-6" aria-hidden="true" tabindex="-1"></a>results[[i]] <span class="ot">&lt;-</span> <span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(<span class="fu">sample</span>(<span class="fu">V</span>(g)<span class="sc">$</span>color))))</span>
+<span id="cb186-7"><a href="social-networks.html#cb186-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb186-8"><a href="social-networks.html#cb186-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><br></p>
+<p>We can plot the distribution of these results and overlay our original assortativity value of 0.2.</p>
+<div class="sourceCode" id="cb187"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb187-1"><a href="social-networks.html#cb187-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb187-2"><a href="social-networks.html#cb187-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb187-3"><a href="social-networks.html#cb187-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(results), <span class="fu">aes</span>(<span class="at">x=</span>results)) <span class="sc">+</span></span>
+<span id="cb187-4"><a href="social-networks.html#cb187-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">&#39;black&#39;</span>,<span class="at">fill=</span><span class="st">&#39;lightseagreen&#39;</span>, <span class="at">binwidth =</span> <span class="fl">0.02</span>) <span class="sc">+</span></span>
+<span id="cb187-5"><a href="social-networks.html#cb187-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb187-6"><a href="social-networks.html#cb187-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> ast, <span class="at">lwd=</span><span class="dv">1</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-257-1.png" width="480" />
+<br></p>
+<p>To compute our p-value, we want to know what proportion of permutations are greater than our observed value. We can calculate that as follows:</p>
+<div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="social-networks.html#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(results<span class="sc">&gt;</span>ast)<span class="sc">/</span>nperms</span></code></pre></div>
+<pre><code>## [1] 0.0271</code></pre>
+<p><br></p>
+<p>This demonstrates that only 2.71% of permutations (271 out of 10,000) led to assortativity values greater than our observed value. We may conclude from this that our assortativity is significantly positive- suggesting there is a relationship between group membership and network position. i.e. that similar group members are more likely than chance to associate with each other.</p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="plotting-sociomatrices-1.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/jalapic/guides/edit/master/04-networks.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/jalapic/guides/blob/master/04-networks.Rmd",
+"text": null
+},
+"download": null,
+"search": {
+"engine": "lunr",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
