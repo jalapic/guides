@@ -32,3 +32,4 @@ social-networks
 permutation-methods
 node-permutation-example
 random-graph-approach
+mixed-effect-models

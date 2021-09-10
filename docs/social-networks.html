@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 4 Social Networks | Curley Lab Code Tutorials</title>
   <meta name="description" content="Chapter 4 Social Networks | Curley Lab Code Tutorials" />
-  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 4 Social Networks | Curley Lab Code Tutorials" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="James Curley" />
 
 
-<meta name="date" content="2021-09-09" />
+<meta name="date" content="2021-09-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,9 +32,9 @@
   
   
 <link rel="prev" href="plotting-sociomatrices-1.html"/>
-
-<script src="libs/header-attrs-2.9/header-attrs.js"></script>
-<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link rel="next" href="mixed-effect-models.html"/>
+<script src="libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -59,7 +59,6 @@
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
@@ -189,6 +188,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4.1.2" data-path="social-networks.html"><a href="social-networks.html#random-graph-approach"><i class="fa fa-check"></i><b>4.1.2</b> Random Graph Approach</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="5" data-path="mixed-effect-models.html"><a href="mixed-effect-models.html"><i class="fa fa-check"></i><b>5</b> Mixed-Effect Models</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 </ul>
@@ -232,10 +232,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb166-2"><a href="social-networks.html#cb166-2" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;yellow&quot;</span>,<span class="st">&quot;white&quot;</span>)</span>
 <span id="cb166-3"><a href="social-networks.html#cb166-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(ids) <span class="ot">&lt;-</span> <span class="fu">rep</span>(colors, <span class="at">each=</span><span class="dv">5</span>)</span>
 <span id="cb166-4"><a href="social-networks.html#cb166-4" aria-hidden="true" tabindex="-1"></a>ids</span></code></pre></div>
-<pre><code>##    red    red    red    red    red   blue   blue   blue   blue   blue yellow 
-##    &quot;A&quot;    &quot;B&quot;    &quot;C&quot;    &quot;D&quot;    &quot;E&quot;    &quot;F&quot;    &quot;G&quot;    &quot;H&quot;    &quot;I&quot;    &quot;J&quot;    &quot;K&quot; 
-## yellow yellow yellow yellow  white  white  white  white  white 
-##    &quot;L&quot;    &quot;M&quot;    &quot;N&quot;    &quot;O&quot;    &quot;P&quot;    &quot;Q&quot;    &quot;R&quot;    &quot;S&quot;    &quot;T&quot;</code></pre>
+<pre><code>##    red    red    red    red    red   blue   blue   blue   blue   blue yellow yellow yellow yellow yellow  white  white  white 
+##    &quot;A&quot;    &quot;B&quot;    &quot;C&quot;    &quot;D&quot;    &quot;E&quot;    &quot;F&quot;    &quot;G&quot;    &quot;H&quot;    &quot;I&quot;    &quot;J&quot;    &quot;K&quot;    &quot;L&quot;    &quot;M&quot;    &quot;N&quot;    &quot;O&quot;    &quot;P&quot;    &quot;Q&quot;    &quot;R&quot; 
+##  white  white 
+##    &quot;S&quot;    &quot;T&quot;</code></pre>
 <p><br></p>
 <p>We can also store this same data as a data.frame giving each node and its group membership (which we’ll call <code>color</code>).</p>
 <div class="sourceCode" id="cb168"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb168-1"><a href="social-networks.html#cb168-1" aria-hidden="true" tabindex="-1"></a>nodes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(ids,<span class="at">color =</span> <span class="fu">rep</span>(colors, <span class="at">each=</span><span class="dv">5</span>))</span>
@@ -324,24 +324,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb172-4"><a href="social-networks.html#cb172-4" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">simplify</span>(g)</span>
 <span id="cb172-5"><a href="social-networks.html#cb172-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb172-6"><a href="social-networks.html#cb172-6" aria-hidden="true" tabindex="-1"></a>g</span></code></pre></div>
-<pre><code>## IGRAPH 9f1369b UN-- 20 43 -- 
+<pre><code>## IGRAPH 0f038a6 UN-- 20 43 -- 
 ## + attr: name (v/c)
-## + edges from 9f1369b (vertex names):
-##  [1] B--P C--P B--S C--H B--K F--K S--K K--Q B--A H--A H--A A--D F--J K--J A--J
-## [16] C--G H--G Q--G D--G J--G S--T G--T Q--O A--O D--O T--O R--E P--E S--E H--E
-## [31] A--E D--E T--E F--L Q--L J--L O--L R--N Q--N L--N B--I E--I S--M</code></pre>
+## + edges from 0f038a6 (vertex names):
+##  [1] B--P C--P B--S C--H B--K F--K S--K K--Q B--A H--A H--A A--D F--J K--J A--J C--G H--G Q--G D--G J--G S--T G--T Q--O A--O D--O
+## [26] T--O R--E P--E S--E H--E A--E D--E T--E F--L Q--L J--L O--L R--N Q--N L--N B--I E--I S--M</code></pre>
 <p><br></p>
 <p>The above output shows the <code>igraph</code> object.</p>
 <p>Next, we shall use some code to add a <code>color</code> class to each node. We do this by matching the names of the vertices <code>V(g)$name</code> with the names in the nodes data.frame.</p>
 <div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="social-networks.html#cb174-1" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(g)<span class="sc">$</span>color <span class="ot">&lt;-</span> nodes<span class="sc">$</span>color[<span class="fu">match</span>( <span class="fu">V</span>(g)<span class="sc">$</span>name, nodes<span class="sc">$</span>ids ) ]</span>
 <span id="cb174-2"><a href="social-networks.html#cb174-2" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(g)<span class="sc">$</span>color</span></code></pre></div>
-<pre><code>##  [1] &quot;red&quot;    &quot;red&quot;    &quot;white&quot;  &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;blue&quot;   &quot;yellow&quot;
-##  [9] &quot;white&quot;  &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;blue&quot;   &quot;white&quot;  &quot;yellow&quot; &quot;red&quot;   
-## [17] &quot;yellow&quot; &quot;yellow&quot; &quot;blue&quot;   &quot;yellow&quot;</code></pre>
+<pre><code>##  [1] &quot;red&quot;    &quot;red&quot;    &quot;white&quot;  &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;blue&quot;   &quot;yellow&quot; &quot;white&quot;  &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;blue&quot;   &quot;white&quot; 
+## [15] &quot;yellow&quot; &quot;red&quot;    &quot;yellow&quot; &quot;yellow&quot; &quot;blue&quot;   &quot;yellow&quot;</code></pre>
 <p><br></p>
 <p>We can now plot our network by group membership. Each color represents a different group. Our question of interest is <strong>Do individuals from the same group show preferential attachment to each other?</strong>.</p>
 <div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="social-networks.html#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(g, <span class="at">layout=</span>layout_with_lgl, <span class="at">vertex.label.color=</span><span class="st">&quot;black&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-192-1.png" width="480" />
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-92-1.png" width="480" />
 <br></p>
 <p>From the above graph, it looks like perhaps invididual groups are associating preferentially which each other. We can formally measure that by calculating the assortativity. It ranges from -1 to 1. 1 indicates complete association by group membership. 0 indicates no relationship between group membership and association. -1 means that group members preferentially avoid each other. The <code>assortativity</code> function in <code>igraph</code> helps calculate this:</p>
 <div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb177-1"><a href="social-networks.html#cb177-1" aria-hidden="true" tabindex="-1"></a>ast <span class="ot">&lt;-</span> <span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(<span class="fu">V</span>(g)<span class="sc">$</span>color)), <span class="at">directed=</span>F)</span>
@@ -353,9 +351,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The simplest way to change the group membership would be to permute (shuffle) the node color category and reassign. For example if we do:</p>
 <div class="sourceCode" id="cb179"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb179-1"><a href="social-networks.html#cb179-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">sample</span>(nodes<span class="sc">$</span>color)</span>
 <span id="cb179-2"><a href="social-networks.html#cb179-2" aria-hidden="true" tabindex="-1"></a>x</span></code></pre></div>
-<pre><code>##  [1] &quot;blue&quot;   &quot;red&quot;    &quot;blue&quot;   &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;white&quot;  &quot;white&quot; 
-##  [9] &quot;yellow&quot; &quot;yellow&quot; &quot;red&quot;    &quot;white&quot;  &quot;yellow&quot; &quot;red&quot;    &quot;yellow&quot; &quot;blue&quot;  
-## [17] &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;yellow&quot;</code></pre>
+<pre><code>##  [1] &quot;blue&quot;   &quot;red&quot;    &quot;blue&quot;   &quot;red&quot;    &quot;red&quot;    &quot;blue&quot;   &quot;white&quot;  &quot;white&quot;  &quot;yellow&quot; &quot;yellow&quot; &quot;red&quot;    &quot;white&quot;  &quot;yellow&quot; &quot;red&quot;   
+## [15] &quot;yellow&quot; &quot;blue&quot;   &quot;white&quot;  &quot;blue&quot;   &quot;white&quot;  &quot;yellow&quot;</code></pre>
 <p>We have now fully shuffled the color membership.</p>
 <p>We could then recalculate the assortativity for this one sample of shuffled group memberships and see if it was higher or lower than our original one.</p>
 <div class="sourceCode" id="cb181"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb181-1"><a href="social-networks.html#cb181-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assortativity</span>(g, <span class="at">types1 =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(x)), <span class="at">directed=</span>F)</span></code></pre></div>
@@ -377,7 +374,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb183-13"><a href="social-networks.html#cb183-13" aria-hidden="true" tabindex="-1"></a>     )</span>
 <span id="cb183-14"><a href="social-networks.html#cb183-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb183-15"><a href="social-networks.html#cb183-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-196-1.png" width="480" />
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-96-1.png" width="480" />
 <br></p>
 <p>Three of these values are negative and one is a small positive. So they are all therefore below our original observed value.</p>
 <p>We could redo this thousands of times and get a distribution of assortativity values for shuffled (permuted) nodes. Below we do this in a loop 10,000 times:</p>
@@ -397,7 +394,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb185-4"><a href="social-networks.html#cb185-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">&#39;black&#39;</span>,<span class="at">fill=</span><span class="st">&#39;lightseagreen&#39;</span>, <span class="at">binwidth =</span> <span class="fl">0.02</span>) <span class="sc">+</span></span>
 <span id="cb185-5"><a href="social-networks.html#cb185-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
 <span id="cb185-6"><a href="social-networks.html#cb185-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> ast, <span class="at">lwd=</span><span class="dv">1</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-198-1.png" width="480" />
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-98-1.png" width="480" />
 <br></p>
 <p>To compute our p-value, we want to know what proportion of permutations are greater than our observed value. We can calculate that as follows:</p>
 <div class="sourceCode" id="cb186"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb186-1"><a href="social-networks.html#cb186-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(results<span class="sc">&gt;</span>ast)<span class="sc">/</span>nperms</span></code></pre></div>
@@ -411,18 +408,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Another approach that is taken is to compare our observed finding to a distribution of random graphs that have similar properties to our observed graph. The main issue with this approach in animal behavior is that it is incredibly difficult to really produce random graphs that have similar enough properties to our observed data. Therefore the below is just a demonstration of this approach rather than a recommendation.</p>
 <p>In our observed graph had 20 nodes and 43 undirected edges:</p>
 <div class="sourceCode" id="cb188"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb188-1"><a href="social-networks.html#cb188-1" aria-hidden="true" tabindex="-1"></a>g</span></code></pre></div>
-<pre><code>## IGRAPH 9f1369b UN-- 20 43 -- 
+<pre><code>## IGRAPH 0f038a6 UN-- 20 43 -- 
 ## + attr: name (v/c), color (v/c)
-## + edges from 9f1369b (vertex names):
-##  [1] B--P C--P B--S C--H B--K F--K S--K K--Q B--A H--A H--A A--D F--J K--J A--J
-## [16] C--G H--G Q--G D--G J--G S--T G--T Q--O A--O D--O T--O R--E P--E S--E H--E
-## [31] A--E D--E T--E F--L Q--L J--L O--L R--N Q--N L--N B--I E--I S--M</code></pre>
+## + edges from 0f038a6 (vertex names):
+##  [1] B--P C--P B--S C--H B--K F--K S--K K--Q B--A H--A H--A A--D F--J K--J A--J C--G H--G Q--G D--G J--G S--T G--T Q--O A--O D--O
+## [26] T--O R--E P--E S--E H--E A--E D--E T--E F--L Q--L J--L O--L R--N Q--N L--N B--I E--I S--M</code></pre>
 <p><br></p>
 <p>One random graph we could generate is a Erdos-Renyi graph. With this graph we can generate random graphs that contain the same number of nodes and edges as our observed one.</p>
 <div class="sourceCode" id="cb190"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb190-1"><a href="social-networks.html#cb190-1" aria-hidden="true" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">sample_gnm</span>(<span class="at">n=</span><span class="dv">20</span>, <span class="at">m=</span><span class="dv">43</span>) </span>
 <span id="cb190-2"><a href="social-networks.html#cb190-2" aria-hidden="true" tabindex="-1"></a><span class="fu">V</span>(r1)<span class="sc">$</span>color <span class="ot">&lt;-</span> nodes<span class="sc">$</span>color</span>
 <span id="cb190-3"><a href="social-networks.html#cb190-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(r1, <span class="at">layout=</span>layout_with_lgl, <span class="at">vertex.label.color=</span><span class="st">&quot;black&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-201-1.png" width="480" />
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-101-1.png" width="480" />
 <br></p>
 <div class="sourceCode" id="cb191"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb191-1"><a href="social-networks.html#cb191-1" aria-hidden="true" tabindex="-1"></a><span class="fu">assortativity</span>(r1, <span class="at">types1 =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">each=</span><span class="dv">5</span>), <span class="at">directed =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## [1] 0.02100692</code></pre>
@@ -446,7 +442,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb194-4"><a href="social-networks.html#cb194-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color=</span><span class="st">&#39;black&#39;</span>,<span class="at">fill=</span><span class="st">&#39;dodgerblue&#39;</span>, <span class="at">binwidth =</span> <span class="fl">0.02</span>) <span class="sc">+</span></span>
 <span id="cb194-5"><a href="social-networks.html#cb194-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
 <span id="cb194-6"><a href="social-networks.html#cb194-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> ast, <span class="at">lwd=</span><span class="dv">1</span>, <span class="at">lty=</span><span class="dv">2</span>, <span class="at">color=</span><span class="st">&quot;red&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-204-1.png" width="480" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-104-1.png" width="480" /></p>
 <p>And, again, we can calculate the p-value by determining what proportion of random graphs have values of assortativity greater than our observed value of 0.21</p>
 <div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="social-networks.html#cb195-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(results1<span class="sc">&gt;</span>ast)<span class="sc">/</span>nperms</span></code></pre></div>
 <pre><code>## [1] 0.0204</code></pre>
@@ -467,8 +463,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           </div>
         </div>
       </div>
-<a href="plotting-sociomatrices-1.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="plotting-sociomatrices-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="mixed-effect-models.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -512,10 +508,6 @@ gitbook.start({
 "text": null
 },
 "download": null,
-"search": {
-"engine": "lunr",
-"options": null
-},
 "toc": {
 "collapse": "subsection"
 }

@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 2 Analyzing Social Hierarchy Data | Curley Lab Code Tutorials</title>
   <meta name="description" content="Chapter 2 Analyzing Social Hierarchy Data | Curley Lab Code Tutorials" />
-  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.22 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 2 Analyzing Social Hierarchy Data | Curley Lab Code Tutorials" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="James Curley" />
 
 
-<meta name="date" content="2021-09-09" />
+<meta name="date" content="2021-09-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,8 +33,8 @@
   
 <link rel="prev" href="index.html"/>
 <link rel="next" href="plotting-sociomatrices-1.html"/>
-<script src="libs/header-attrs-2.9/header-attrs.js"></script>
-<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -59,7 +59,6 @@
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
@@ -189,6 +188,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4.1.2" data-path="social-networks.html"><a href="social-networks.html#random-graph-approach"><i class="fa fa-check"></i><b>4.1.2</b> Random Graph Approach</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="5" data-path="mixed-effect-models.html"><a href="mixed-effect-models.html"><i class="fa fa-check"></i><b>5</b> Mixed-Effect Models</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
 </ul>
@@ -266,10 +266,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="analyzing-social-hierarchy-data.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(df<span class="sc">$</span>Notes<span class="sc">==</span><span class="st">&quot;couldn&#39;t tell who won&quot;</span>)</span></code></pre></div>
 <pre><code>## [1] 951</code></pre>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="analyzing-social-hierarchy-data.html#cb7-1" aria-hidden="true" tabindex="-1"></a>df[<span class="dv">951</span>,]</span></code></pre></div>
-<pre><code>##              Timestamp Actor Behavior Recipient Location Observer
-## 951 11/3/2014 15:44:34  2, 9 Fighting      2, 9      NB5       BN
-##                     Notes
-## 951 couldn&#39;t tell who won</code></pre>
+<pre><code>##              Timestamp Actor Behavior Recipient Location Observer                 Notes
+## 951 11/3/2014 15:44:34  2, 9 Fighting      2, 9      NB5       BN couldn&#39;t tell who won</code></pre>
 <p>As can be seen, it’s a tie between 2 &amp; 9.</p>
 <p><br></p>
 <div id="time-formats" class="section level3" number="2.3.1">
@@ -290,35 +288,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-5"><a href="analyzing-social-hierarchy-data.html#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-6"><a href="analyzing-social-hierarchy-data.html#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-7"><a href="analyzing-social-hierarchy-data.html#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df)</span></code></pre></div>
-<pre><code>##             Timestamp Actor    Behavior Recipient Location Observer Notes day
-## 1 2014-10-14 11:57:16 Start       Start     Start    Start       CW  &lt;NA&gt;   1
-## 2 2014-10-14 12:03:10     6    Mounting        10      NB4       CW  &lt;NA&gt;   1
-## 3 2014-10-14 12:04:16     6    Fighting         5      NB5       CW  &lt;NA&gt;   1
-## 4 2014-10-14 12:19:27     3    Fighting         4       ML       CW  &lt;NA&gt;   1
-## 5 2014-10-14 12:28:05     4 Subordinate        10       LL       CW  &lt;NA&gt;   1
-## 6 2014-10-14 12:30:49     4    Fighting         2      NB1       CW  &lt;NA&gt;   1
-##   zhour
-## 1     0
-## 2     1
-## 3     1
-## 4     1
-## 5     1
-## 6     1</code></pre>
+<pre><code>##             Timestamp Actor    Behavior Recipient Location Observer Notes day zhour
+## 1 2014-10-14 11:57:16 Start       Start     Start    Start       CW  &lt;NA&gt;   1     0
+## 2 2014-10-14 12:03:10     6    Mounting        10      NB4       CW  &lt;NA&gt;   1     1
+## 3 2014-10-14 12:04:16     6    Fighting         5      NB5       CW  &lt;NA&gt;   1     1
+## 4 2014-10-14 12:19:27     3    Fighting         4       ML       CW  &lt;NA&gt;   1     1
+## 5 2014-10-14 12:28:05     4 Subordinate        10       LL       CW  &lt;NA&gt;   1     1
+## 6 2014-10-14 12:30:49     4    Fighting         2      NB1       CW  &lt;NA&gt;   1     1</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="analyzing-social-hierarchy-data.html#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span>(df)</span></code></pre></div>
-<pre><code>##                Timestamp Actor          Behavior Recipient Location Observer
-## 1054 2014-11-04 13:51:49     4 Fighting, Chasing         6       LL       WL
-## 1055 2014-11-04 13:52:49     4           Chasing         6       UL       WL
-## 1056 2014-11-04 13:53:42     4           Chasing        10       UL       WL
-## 1057 2014-11-04 13:55:10     6           Chasing        12       LL       WL
-## 1058 2014-11-04 13:56:48     4           Chasing        10       UL       WL
-## 1059 2014-11-04 14:00:48   End               End       End      End       WL
-##      Notes day zhour
-## 1054  &lt;NA&gt;  22     2
-## 1055  &lt;NA&gt;  22     2
-## 1056  &lt;NA&gt;  22     2
-## 1057  &lt;NA&gt;  22     2
-## 1058  &lt;NA&gt;  22     2
-## 1059  &lt;NA&gt;  22     3</code></pre>
+<pre><code>##                Timestamp Actor          Behavior Recipient Location Observer Notes day zhour
+## 1054 2014-11-04 13:51:49     4 Fighting, Chasing         6       LL       WL  &lt;NA&gt;  22     2
+## 1055 2014-11-04 13:52:49     4           Chasing         6       UL       WL  &lt;NA&gt;  22     2
+## 1056 2014-11-04 13:53:42     4           Chasing        10       UL       WL  &lt;NA&gt;  22     2
+## 1057 2014-11-04 13:55:10     6           Chasing        12       LL       WL  &lt;NA&gt;  22     2
+## 1058 2014-11-04 13:56:48     4           Chasing        10       UL       WL  &lt;NA&gt;  22     2
+## 1059 2014-11-04 14:00:48   End               End       End      End       WL  &lt;NA&gt;  22     3</code></pre>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="analyzing-social-hierarchy-data.html#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>day)</span></code></pre></div>
 <pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 21 22</code></pre>
 <p>Notice that there are no observations for day=20 - this will be relevant later on when we plot data by day.</p>
@@ -328,16 +312,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h3><span class="header-section-number">2.3.2</span> Actor/Recipients</h3>
 <p>Next we will look at the Actor and Recipient variables.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="analyzing-social-hierarchy-data.html#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>Actor)</span></code></pre></div>
-<pre><code>##  [1] &quot;Start&quot;  &quot;6&quot;      &quot;3&quot;      &quot;4&quot;      &quot;5&quot;      &quot;1&quot;      &quot;9&quot;      &quot;2, 4&quot;  
-##  [9] &quot;End&quot;    &quot;12&quot;     &quot;2&quot;      &quot;7&quot;      &quot;11&quot;     &quot;1, 2&quot;   &quot;10, 11&quot; &quot;8&quot;     
-## [17] &quot;10&quot;     &quot;2, 9&quot;   &quot;2, 11&quot;  &quot;7, 11&quot;  &quot;4, 6&quot;   &quot;3, 6&quot;</code></pre>
+<pre><code>##  [1] &quot;Start&quot;  &quot;6&quot;      &quot;3&quot;      &quot;4&quot;      &quot;5&quot;      &quot;1&quot;      &quot;9&quot;      &quot;2, 4&quot;   &quot;End&quot;    &quot;12&quot;     &quot;2&quot;      &quot;7&quot;      &quot;11&quot;     &quot;1, 2&quot;  
+## [15] &quot;10, 11&quot; &quot;8&quot;      &quot;10&quot;     &quot;2, 9&quot;   &quot;2, 11&quot;  &quot;7, 11&quot;  &quot;4, 6&quot;   &quot;3, 6&quot;</code></pre>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="analyzing-social-hierarchy-data.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>Recipient)</span></code></pre></div>
-<pre><code>##  [1] &quot;Start&quot;    &quot;10&quot;       &quot;5&quot;        &quot;4&quot;        &quot;2&quot;        &quot;1&quot;       
-##  [7] &quot;11&quot;       &quot;8&quot;        &quot;2, 4&quot;     &quot;7&quot;        &quot;3&quot;        &quot;6&quot;       
-## [13] &quot;End&quot;      &quot;9&quot;        &quot;7, 10&quot;    &quot;1, 2&quot;     &quot;10, 11&quot;   &quot;12&quot;      
-## [19] &quot;1, 9&quot;     &quot;7, 8&quot;     &quot;7, 12&quot;    &quot;2, 6&quot;     &quot;8, 10&quot;    &quot;3, 7&quot;    
-## [25] &quot;11, 12&quot;   &quot;2, 9&quot;     &quot;2, 7&quot;     &quot;2, 8, 10&quot; &quot;1, 7, 12&quot; &quot;3, 6&quot;    
-## [31] &quot;6, 8&quot;     &quot;2, 11&quot;</code></pre>
+<pre><code>##  [1] &quot;Start&quot;    &quot;10&quot;       &quot;5&quot;        &quot;4&quot;        &quot;2&quot;        &quot;1&quot;        &quot;11&quot;       &quot;8&quot;        &quot;2, 4&quot;     &quot;7&quot;        &quot;3&quot;       
+## [12] &quot;6&quot;        &quot;End&quot;      &quot;9&quot;        &quot;7, 10&quot;    &quot;1, 2&quot;     &quot;10, 11&quot;   &quot;12&quot;       &quot;1, 9&quot;     &quot;7, 8&quot;     &quot;7, 12&quot;    &quot;2, 6&quot;    
+## [23] &quot;8, 10&quot;    &quot;3, 7&quot;     &quot;11, 12&quot;   &quot;2, 9&quot;     &quot;2, 7&quot;     &quot;2, 8, 10&quot; &quot;1, 7, 12&quot; &quot;3, 6&quot;     &quot;6, 8&quot;     &quot;2, 11&quot;</code></pre>
 <p>First of all, we can remove the ‘Start’ and ‘End’ rows. These indicate when an observer starts and finishes their set observation. We need these when counting rates of behavior per hour, but we won’t do that in this example.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="analyzing-social-hierarchy-data.html#cb19-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>Actor<span class="sc">!=</span><span class="st">&quot;Start&quot;</span>,]</span>
 <span id="cb19-2"><a href="analyzing-social-hierarchy-data.html#cb19-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>Actor<span class="sc">!=</span><span class="st">&quot;End&quot;</span>,]</span></code></pre></div>
@@ -349,20 +329,13 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <span id="cb20-3"><a href="analyzing-social-hierarchy-data.html#cb20-3" aria-hidden="true" tabindex="-1"></a>df1<span class="ot">&lt;-</span><span class="fu">expandrows</span>(df)</span>
 <span id="cb20-4"><a href="analyzing-social-hierarchy-data.html#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-5"><a href="analyzing-social-hierarchy-data.html#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df1)</span></code></pre></div>
-<pre><code>##              Timestamp Actor    Behavior Recipient Location Observer Notes day
-## 1: 2014-10-14 12:03:10     6    Mounting        10      NB4       CW  &lt;NA&gt;   1
-## 2: 2014-10-14 12:04:16     6    Fighting         5      NB5       CW  &lt;NA&gt;   1
-## 3: 2014-10-14 12:19:27     3    Fighting         4       ML       CW  &lt;NA&gt;   1
-## 4: 2014-10-14 12:28:05     4 Subordinate        10       LL       CW  &lt;NA&gt;   1
-## 5: 2014-10-14 12:30:49     4    Fighting         2      NB1       CW  &lt;NA&gt;   1
-## 6: 2014-10-14 12:34:39     4    Fighting         2      NB5       CW  &lt;NA&gt;   1
-##    zhour score
-## 1:     1     1
-## 2:     1     1
-## 3:     1     1
-## 4:     1     1
-## 5:     1     1
-## 6:     1     1</code></pre>
+<pre><code>##              Timestamp Actor    Behavior Recipient Location Observer Notes day zhour score
+## 1: 2014-10-14 12:03:10     6    Mounting        10      NB4       CW  &lt;NA&gt;   1     1     1
+## 2: 2014-10-14 12:04:16     6    Fighting         5      NB5       CW  &lt;NA&gt;   1     1     1
+## 3: 2014-10-14 12:19:27     3    Fighting         4       ML       CW  &lt;NA&gt;   1     1     1
+## 4: 2014-10-14 12:28:05     4 Subordinate        10       LL       CW  &lt;NA&gt;   1     1     1
+## 5: 2014-10-14 12:30:49     4    Fighting         2      NB1       CW  &lt;NA&gt;   1     1     1
+## 6: 2014-10-14 12:34:39     4    Fighting         2      NB5       CW  &lt;NA&gt;   1     1     1</code></pre>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="analyzing-social-hierarchy-data.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(df1)</span></code></pre></div>
 <pre><code>## [1] 1031</code></pre>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="analyzing-social-hierarchy-data.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df1<span class="sc">$</span>Actor)</span></code></pre></div>
@@ -509,18 +482,18 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 ## [1] 1e-04
 ## 
 ## $mean_phi
-## [1] 0.02529858
+## [1] 0.02515204
 ## 
 ## $mean_DC
-## [1] 0.1286561
+## [1] 0.1283655
 ## 
 ## $variance_phi
 ##              [,1]
-## [1,] 2.548583e-05
+## [1,] 2.521421e-05
 ## 
 ## $variance_DC
 ##              [,1]
-## [1,] 0.0002081977
+## [1,] 0.0002044536
 ## 
 ## $DC
 ## [1] 0.8712195
@@ -539,15 +512,15 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <p>The most common measure of social hierarchy linearity is the modified h’ value by <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.507.3738&amp;rep=rep1&amp;type=pdf">De Vries 1995</a>. The <code>devries</code> function will provide the h’ value of a sociomatrix and associated p-value from a randomization test.</p>
 <div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="analyzing-social-hierarchy-data.html#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">devries</span>(wlmat)</span></code></pre></div>
 <pre><code>## $`h-modified`
-## [1] 0.7586231
+## [1] 0.7587035
 ## 
 ## $`p-value`
 ## [1] 0</code></pre>
 <p>It’s also possible to plot the results of the randomization test:</p>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="analyzing-social-hierarchy-data.html#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">devries</span>(wlmat, <span class="at">plot=</span>T)</span></code></pre></div>
-<pre><code>## h-modified = 0.7587741 
+<pre><code>## h-modified = 0.7582965 
 ##  p-value= 0</code></pre>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-123-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 <p><br></p>
 </div>
 <div id="triangle-transitivity" class="section level3" number="2.5.4">
@@ -592,17 +565,15 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <h3><span class="header-section-number">2.6.1</span> David’s Scores</h3>
 <p>A simple measure is the David’s Scores of each individual. This can be considered to be the opponent-adjusted win proportion of each individual. Individuals with positive David’s Scores are more dominant. Individuals with negative David’s Scores are losing more fights.</p>
 <div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="analyzing-social-hierarchy-data.html#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ds</span>(wlmat)</span></code></pre></div>
-<pre><code>##         1        10        11        12         2         3         4 
-## -15.31674 -13.52634  11.59505 -18.63460 -21.89749  21.64528  55.85957 
-##         5         6         7         8         9 
-## -14.45596  15.03441  26.89502 -15.08334 -32.11487</code></pre>
+<pre><code>##         1        10        11        12         2         3         4         5         6         7         8         9 
+## -15.31674 -13.52634  11.59505 -18.63460 -21.89749  21.64528  55.85957 -14.45596  15.03441  26.89502 -15.08334 -32.11487</code></pre>
 <p>Viewing this as a simple plot shows the steepness of David’s Scores:</p>
 <div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="analyzing-social-hierarchy-data.html#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="fu">rev</span>(<span class="fu">sort</span>(<span class="fu">ds</span>(wlmat))), <span class="st">&quot;l&quot;</span>,</span>
 <span id="cb63-2"><a href="analyzing-social-hierarchy-data.html#cb63-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Rank&quot;</span>,</span>
 <span id="cb63-3"><a href="analyzing-social-hierarchy-data.html#cb63-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;David&#39;s Score&quot;</span>,</span>
 <span id="cb63-4"><a href="analyzing-social-hierarchy-data.html#cb63-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;David&#39;s Scores by Rank&quot;</span>)</span>
 <span id="cb63-5"><a href="analyzing-social-hierarchy-data.html#cb63-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>, <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-129-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
 <p><br></p>
 </div>
 <div id="isi-method" class="section level3" number="2.6.2">
@@ -658,30 +629,21 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <h2><span class="header-section-number">2.7</span> Plotting Sociomatrices</h2>
 <p>We can also use the observed best ranking order of our choice to make a customized raw sociomatrix that we could use in a publication. This is using a <code>ggplot2</code> based function I wrote called matrixplot. If you lookup the function, you can change the color scheme if you wish.</p>
 <div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="analyzing-social-hierarchy-data.html#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrixplot</span>(wlmat, <span class="at">mylevs=</span>isi.out<span class="sc">$</span>best_order)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-133-1.png" width="576" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-33-1.png" width="576" /></p>
 <p>There is also a plot to color the binarized matrix based on the directional consistency of each relationship. The redder a cell, the higher the proportion of wins by that individual. This method is useful for quickly visualizing the inconsistencies in the hierarchy.</p>
 <div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="analyzing-social-hierarchy-data.html#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrixplot0</span>(wlmat, <span class="at">mylevs=</span>isi.out<span class="sc">$</span>best_order)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-134-1.png" width="576" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-34-1.png" width="576" /></p>
 <p>Interestingly the relationship that has the most noticable inconsistency is id-11 vs id-3, where 11 beat 3 eight times but 3 never beat 11. This is despite 3 being higher ranked than 11. Often when examining all data over all days such inconsistencies may be the result of initial day 1 or day 2 interactions. This can be checked using the function <code>contests</code>.</p>
 <div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="analyzing-social-hierarchy-data.html#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">contests</span>(df1,<span class="dv">11</span>,<span class="dv">3</span>)</span></code></pre></div>
-<pre><code>##              Timestamp Actor    Behavior Recipient Location Observer Notes day
-## 1: 2014-10-16 12:42:13    11 Subordinate         3       UR       CW  &lt;NA&gt;   3
-## 2: 2014-10-16 12:42:32    11     Chasing         3       UL       CW  &lt;NA&gt;   3
-## 3: 2014-10-16 13:25:25    11     Chasing         3       UL       CW  &lt;NA&gt;   3
-## 4: 2014-11-03 14:50:47    11     Chasing         3       UR       AP  &lt;NA&gt;  21
-## 5: 2014-11-03 14:51:49    11     Chasing         3       UR       AP  &lt;NA&gt;  21
-## 6: 2014-11-03 14:54:48    11     Chasing         3       UR       AP  &lt;NA&gt;  21
-## 7: 2014-11-03 14:57:49    11     Chasing         3       UR       AP  &lt;NA&gt;  21
-## 8: 2014-11-04 13:23:32    11 Induce-flee         3       UR       WL  &lt;NA&gt;  22
-##    zhour score
-## 1:     1     1
-## 2:     1     1
-## 3:     2     1
-## 4:     3     1
-## 5:     3     1
-## 6:     3     1
-## 7:     3     1
-## 8:     2     1</code></pre>
+<pre><code>##              Timestamp Actor    Behavior Recipient Location Observer Notes day zhour score
+## 1: 2014-10-16 12:42:13    11 Subordinate         3       UR       CW  &lt;NA&gt;   3     1     1
+## 2: 2014-10-16 12:42:32    11     Chasing         3       UL       CW  &lt;NA&gt;   3     1     1
+## 3: 2014-10-16 13:25:25    11     Chasing         3       UL       CW  &lt;NA&gt;   3     2     1
+## 4: 2014-11-03 14:50:47    11     Chasing         3       UR       AP  &lt;NA&gt;  21     3     1
+## 5: 2014-11-03 14:51:49    11     Chasing         3       UR       AP  &lt;NA&gt;  21     3     1
+## 6: 2014-11-03 14:54:48    11     Chasing         3       UR       AP  &lt;NA&gt;  21     3     1
+## 7: 2014-11-03 14:57:49    11     Chasing         3       UR       AP  &lt;NA&gt;  21     3     1
+## 8: 2014-11-04 13:23:32    11 Induce-flee         3       UR       WL  &lt;NA&gt;  22     2     1</code></pre>
 <p>Here there are three early interactions on day 3, but 11 continues to beat 3 on the last two days of observation. This was by three separate observers suggesting that it is reliable. Most interestingly though, none of the agonistic interactions were fights - all were chases or induced subordinate behaviors (in our ethogram ‘induced-flee’ means here that animal 11 caused 3 to flee and on row 1 that animal 11 caused animal 3 to show a subordinate posture.</p>
 <p>Clearly, there are many other methods for assessing the individual rankings/ratings of a social group. There are several network based metrics, matrix based measures, preferred comparison methods etc. I may cover these in a future primer.</p>
 </div>
@@ -695,7 +657,7 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <span id="cb74-5"><a href="analyzing-social-hierarchy-data.html#cb74-5" aria-hidden="true" tabindex="-1"></a>dfobs <span class="ot">&lt;-</span> <span class="fu">merge</span>(<span class="fu">individualDomProb</span>(DominanceProbability.obs<span class="sc">$</span>p.hat), s.rank.obs<span class="sc">$</span>BestSimulatedRankOrder)</span>
 <span id="cb74-6"><a href="analyzing-social-hierarchy-data.html#cb74-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dfobs<span class="sc">$</span>ranking, dfobs<span class="sc">$</span>Mean,</span>
 <span id="cb74-7"><a href="analyzing-social-hierarchy-data.html#cb74-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">&quot;Rank&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;Dominance Certainty&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-136-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
 <p><br></p>
 </div>
 <div id="temporal-based-methods" class="section level2" number="2.9">
@@ -731,11 +693,11 @@ To simplify this process, I have stored a function - <code>expandrows</code> on 
 <p>Of course, the choice of <code>cval</code> affects how volatile individual ratings are. When recalculating ratings after every behavioral interaction, we have found that a lower value of <code>cval</code> provides stable rankings that most strongly reflect the rankings of animals as determined by other methods.</p>
 <p>How Glicko ratings change over time can be calculated using the basic plot function:</p>
 <div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="analyzing-social-hierarchy-data.html#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gl,<span class="at">npl=</span><span class="dv">12</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-138-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-38-1.png" width="672" /></p>
 <p><br>
 The above base r plot is not aesthetically pleasing. I have created a default function that allows us to take a glicko object and convert this to a more attractive plot.</p>
 <div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="analyzing-social-hierarchy-data.html#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotglicko</span>(glick.df, <span class="at">cval=</span><span class="dv">2</span>, <span class="at">ylim1=</span><span class="dv">1500</span>, <span class="at">ylim2=</span><span class="dv">3000</span>, <span class="at">thetitle=</span><span class="st">&quot;Glicko Ratings over Time&quot;</span>,<span class="at">linewd=</span>.<span class="dv">5</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-139-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-39-1.png" width="672" /></p>
 <p><br></p>
 <p>We can also plot the final glicko ratings by rank and show the deviations in ratings scores.</p>
 <div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="analyzing-social-hierarchy-data.html#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(gl<span class="sc">$</span>ratings, <span class="fu">aes</span>(<span class="at">x=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">y=</span>Rating)) <span class="sc">+</span> </span>
@@ -750,7 +712,7 @@ The above base r plot is not aesthetically pleasing. I have created a default fu
 <span id="cb79-10"><a href="analyzing-social-hierarchy-data.html#cb79-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">&quot;Animal ID&quot;</span>) <span class="sc">+</span></span>
 <span id="cb79-11"><a href="analyzing-social-hierarchy-data.html#cb79-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
 <span id="cb79-12"><a href="analyzing-social-hierarchy-data.html#cb79-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Final Glicko Ratings&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-140-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
 <p><br></p>
 </div>
 <div id="stability-indices" class="section level3" number="2.9.2">
@@ -796,7 +758,7 @@ The above base r plot is not aesthetically pleasing. I have created a default fu
 <span id="cb84-2"><a href="analyzing-social-hierarchy-data.html#cb84-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Day&quot;</span>,</span>
 <span id="cb84-3"><a href="analyzing-social-hierarchy-data.html#cb84-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Triangle Transitivity&quot;</span>,</span>
 <span id="cb84-4"><a href="analyzing-social-hierarchy-data.html#cb84-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;Change in Triangle Transitivity over Days&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-143-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-43-1.png" width="672" /></p>
 <p><br>
 Of course, we could prefer to use a different temporal strategy. For instance, we could use a sliding window approach looking at how triangle transitivity changes for e.g. 3 days at a time. So we would plot ttri for days 1-3, then days 2-4, 3-5 etc.</p>
 <p>Another extension of this approach is something we discussed in our <a href="http://curleylab.psych.columbia.edu/pdfs/Williamson_et_al_2016_AB.pdf">Animal Behaviour</a> paper. At the end of each day, we could only keep the last ‘n’ interactions between any pair of individuals. This has the advantage of not including behavioral events that occurred long before the day of interest. For example, if animal A had accrued 100 wins against B and B had never beaten A, then if that relationships changed on e.g. day 10 it could take several days to register in the ttri - because it could take a long time for B to get more than 100 wins against A to ‘flip’ that relationship. Only considering e.g. the last 3 interactions overcomes this issue.</p>
@@ -810,7 +772,7 @@ Of course, we could prefer to use a different temporal strategy. For instance, w
 <span id="cb85-7"><a href="analyzing-social-hierarchy-data.html#cb85-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Day&quot;</span>,</span>
 <span id="cb85-8"><a href="analyzing-social-hierarchy-data.html#cb85-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Triangle Transitivity&quot;</span>,</span>
 <span id="cb85-9"><a href="analyzing-social-hierarchy-data.html#cb85-9" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;Change in Triangle Transitivity </span><span class="sc">\n</span><span class="st"> using 3 most recent interactions&quot;</span>)</span></code></pre></div>
-<p><img src="bookdownproj_files/figure-html/unnamed-chunk-144-1.png" width="672" /></p>
+<p><img src="bookdownproj_files/figure-html/unnamed-chunk-44-1.png" width="672" /></p>
 <p><br></p>
 </div>
 </div>
@@ -871,10 +833,6 @@ gitbook.start({
 "text": null
 },
 "download": null,
-"search": {
-"engine": "lunr",
-"options": null
-},
 "toc": {
 "collapse": "subsection"
 }

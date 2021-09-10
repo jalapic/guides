@@ -1,0 +1,7 @@
+# Mixed-Effect Models
+
+<br>
+
+In this section I will describe the reasons why we use mixed-effect models, and how to apply such models to our type of data.  Until I find time to write that tutorial, I would recommend this [really good tutorial](https://gkhajduk.github.io/2017-03-09-mixed-models/) that introduces mixed-effect models.
+
+<br>
