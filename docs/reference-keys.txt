@@ -33,9 +33,8 @@ permutation-methods
 node-permutation-example
 random-graph-approach
 mixed-effect-models
-musicnotationr---plotting-temporal-hierarchy-data
+musicnotationr
 installation
 sample-data-sets
 plotting-music-notation-social-graphs
 further-customization-of-music-notation-plots
-musicnotationr
